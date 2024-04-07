@@ -1,6 +1,6 @@
 # diceroll API
 
-**diceroll** is a Python library that provides API functionality (DiceAPI) for simulating dice rolls and performing dice-related operations. It includes classes for rolling dice, tracking & saving roll results, and animating dice rolls using Pygame. More features are being added as need arises.
+**diceroll** is a Python library that provides API functionality [(DiceAPI)](https://github.com/ViciousSquid/diceroll/blob/main/Docs/DiceAPI.md) for simulating dice rolls and performing dice-related operations. It includes classes for rolling dice, tracking & saving roll results, and animating dice rolls using Pygame. More features are being added as need arises.
 
 If you're looking for dice-related shenanigans in your own program, I hope this helps x
 
