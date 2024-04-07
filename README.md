@@ -6,7 +6,7 @@ Additionally, an optional animation feature is available to visualize the dice r
 
 <code style="color : name_color">**DiceRoller**</code> class: This class encapsulates the core functionality of rolling dice and maintaining the state of the last roll.
 
-<code style="color : name_color">**OutcomeDeterminer**</code> class: class: This class determines the outcome of a dice roll based on a target number and predefined success/failure outcomes.
+<code style="color : name_color">**OutcomeDeterminer**</code> class: This class determines the outcome of a dice roll based on a target number and predefined success/failure outcomes.
 
 <code style="color : name_color">**roll_dice**</code> function: This is a utility function that combines the functionality of <code style="color : name_color">DiceRoller</code> and <code style="color : name_color">OutcomeDeterminer</code> to perform a dice roll and return the result and outcome (if a target is provided).
 
