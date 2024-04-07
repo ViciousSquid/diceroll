@@ -12,7 +12,7 @@ This library and API were specifically designed for and alongside the **Adventur
 - Save the last 5 roll results to a file
 - Retrieve the last 5 roll results
 - Enable or disable roll saving
-- Get the available dice colours for dice animation
+- Set/Get the dice colour for dice animation (red, white, blue, black)
 - Perform dice rolls with animated visualizations (optional, requires Pygame)
 
 ## How this is used
