@@ -47,3 +47,5 @@ Documentation: https://github.com/ViciousSquid/diceroll/tree/main/Docs
 <code style="color : name_color">diceroll_anim.py</code> : Contains the <code style="color : name_color">DiceAnimator</code> class, which handles the dice roll animation using the Pygame library.
 
 <code style="color : name_color">roll_dice_example.py</code> : A script that demonstrates the usage of the roll_dice function with and without animation.
+
+<code style="color : name_color">dice_api.py</code> : Exposes API feaures
