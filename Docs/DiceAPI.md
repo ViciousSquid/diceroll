@@ -1,3 +1,4 @@
+For a quick overview of how to make a call for a dice roll through the DiceAPI:
 https://github.com/ViciousSquid/diceroll/blob/main/Docs/How%20to%20ask%20the%20API%20for%20dice.md
 
 ### DiceAPI
