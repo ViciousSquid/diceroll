@@ -1,0 +1,5 @@
+ roll_with_animation function has been added. This function takes the dice_type as a required argument and optional arguments for dice_color, target, success_outcome, and failure_outcome.
+Inside the roll_with_animation function, a DiceRoller instance is created, and the animate_dice_roll function is called to display the dice animation and perform the actual roll.
+If the target, success_outcome, and failure_outcome arguments are provided, the determine_outcome function is called to determine the outcome details based on the roll result and target.
+The roll_with_animation function returns a dictionary containing the roll result and, if the outcome details were provided, the outcome details as well.
+An example usage of the roll_with_animation function is provided at the end of the script, demonstrating how to call the function and handle the returned result.
