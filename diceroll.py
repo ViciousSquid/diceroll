@@ -2,6 +2,7 @@ import random
 import pygame
 import time
 import os
+import re
 
 # Initialize Pygame
 pygame.init()
@@ -13,31 +14,83 @@ window = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption("Dice Roll")
 
 # Set the path for the dice images
-dice_image_path = "/diceroll/images"
+dice_image_path = "images"
 
 # Load dice images
-dice_images = []
-for i in range(1, 7):
-    image_path = os.path.join(dice_image_path, f"dice{i}.png")
-    dice_images.append(pygame.image.load(image_path))
+dice_sets = {
+    'red': [],
+    'white': [],
+    'blue': [],
+    'black': []
+}
 
-def roll_dice(dice_type):
+for color in dice_sets:
+    for i in range(1, 7):
+        image_path = os.path.join(dice_image_path, color, f"dice{i}.png")
+        dice_sets[color].append(pygame.image.load(image_path))
+
+class DiceRoller:
     """
-    Rolls a dice of the specified type and returns the result.
-
-    Args:
-        dice_type (str): The type of dice to roll (e.g., "d6" for a six-sided die).
-
-    Returns:
-        int: The result of the dice roll.
+    A class to encapsulate the dice rolling functionality and maintain the state.
     """
-    dice_size = int(dice_type[1:])
-    roll_result = random.randint(1, dice_size)
-    return roll_result
+
+    def __init__(self):
+        """
+        Initialize the DiceRoller instance with the last roll total and details set to None.
+        """
+        self.last_roll_total = None
+        self.last_roll_details = None
+
+    def roll_dice(self, dice_type):
+        """
+        Rolls one or more dice of the specified type and returns the sum of the results.
+        Updates the last roll total and details.
+
+        Args:
+            dice_type (str): The type of dice to roll (e.g., "2d6" or "3d8+1d4" for a combination of dice).
+
+        Returns:
+            int: The sum of the dice roll results.
+        """
+        roll_results = []
+        roll_sum = 0
+
+        # Split the dice type string into individual components
+        components = re.split(r'(\d+d\d+)', dice_type)
+        for component in components:
+            match = re.match(r"(\d+)d(\d+)", component)
+            if match:
+                num_dice, dice_size = int(match.group(1)), int(match.group(2))
+                component_results = [random.randint(1, dice_size) for _ in range(num_dice)]
+                roll_results.extend(component_results)
+                roll_sum += sum(component_results)
+
+        self.last_roll_total = roll_sum
+        self.last_roll_details = roll_results
+        return roll_sum
+
+    def get_last_roll_total(self):
+        """
+        Returns the total of the last dice roll.
+
+        Returns:
+            int: The total of the last dice roll, or None if no roll has been performed yet.
+        """
+        return self.last_roll_total
+
+    def get_last_roll_details(self):
+        """
+        Returns the individual results of the last dice roll.
+
+        Returns:
+            list: A list containing the individual results of the last dice roll, or None if no roll has been performed yet.
+        """
+        return self.last_roll_details
 
 def determine_outcome(roll_result, target, success_outcome, failure_outcome):
     """
     Determines the outcome based on the dice roll result and the target number.
+    Checks for critical success or failure based on the maximum or minimum dice roll value.
 
     Args:
         roll_result (int): The result of the dice roll.
@@ -48,18 +101,30 @@ def determine_outcome(roll_result, target, success_outcome, failure_outcome):
     Returns:
         dict: The outcome details based on the dice roll result.
     """
-    if roll_result >= target:
+    max_roll_value = sum(range(1, target + 1))  # Assuming the maximum roll value is the sum of all dice faces
+    min_roll_value = len(range(1, target + 1))  # Assuming the minimum roll value is the number of dice
+
+    if roll_result == max_roll_value:
+        outcome = {'critical_success': True, 'details': success_outcome['details']}
+    elif roll_result == min_roll_value:
+        outcome = {'critical_failure': True, 'details': failure_outcome['details']}
+    elif roll_result >= target:
         outcome = success_outcome
     else:
         outcome = failure_outcome
+
+    outcome['roll_result'] = roll_result
     return outcome
 
-def perform_dice_roll(dice_roll_data):
+def perform_dice_roll(dice_roll_data, dice_roller, dice_color):
     """
     Performs a dice roll based on the provided dice roll data and determines the outcome.
+    Uses the DiceRoller instance to perform the roll and retrieve the last roll total.
 
     Args:
         dice_roll_data (dict): The dice roll data from the story JSON.
+        dice_roller (DiceRoller): An instance of the DiceRoller class.
+        dice_color (str): The color of the dice set to use (e.g., "red", "white", "blue", or "black").
 
     Returns:
         dict: The outcome details based on the dice roll result.
@@ -70,18 +135,20 @@ def perform_dice_roll(dice_roll_data):
     failure_outcome = dice_roll_data['failure']
 
     # Animate the dice roll
-    roll_result = animate_dice_roll(dice_type)
+    roll_result = animate_dice_roll(dice_type, dice_color, dice_roller)
 
     outcome = determine_outcome(roll_result, target, success_outcome, failure_outcome)
-    outcome['roll_result'] = roll_result
     return outcome
 
-def animate_dice_roll(dice_type):
+def animate_dice_roll(dice_type, dice_color, dice_roller):
     """
     Animates the dice roll in the Pygame window.
+    Uses the DiceRoller instance to perform the actual roll.
 
     Args:
-        dice_type (str): The type of dice to roll (e.g., "d6" for a six-sided die).
+        dice_type (str): The type of dice to roll (e.g., "2d6" for two six-sided dice).
+        dice_color (str): The color of the dice set to use (e.g., "red", "white", "blue", or "black").
+        dice_roller (DiceRoller): An instance of the DiceRoller class.
 
     Returns:
         int: The result of the dice roll.
@@ -101,7 +168,7 @@ def animate_dice_roll(dice_type):
         window.fill((255, 255, 255))  # Clear the window with a white background
 
         # Display a random dice image with a slight rotation and offset
-        dice_image = random.choice(dice_images)
+        dice_image = random.choice(dice_sets[dice_color])
         dice_rect = dice_image.get_rect(center=(window_width // 2, window_height // 2))
         rotation_angle = random.randint(-10, 10)
         offset_x = random.randint(-10, 10)
@@ -124,7 +191,7 @@ def animate_dice_roll(dice_type):
         window.fill((255, 255, 255))  # Clear the window with a white background
 
         # Display a random dice image with a rotation
-        dice_image = random.choice(dice_images)
+        dice_image = random.choice(dice_sets[dice_color])
         dice_rect = dice_image.get_rect(center=(window_width // 2, window_height // 2))
         rotation_angle = (time.time() - start_time) / tumble_duration * 360
         rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
@@ -135,15 +202,58 @@ def animate_dice_roll(dice_type):
         clock.tick(60)  # Limit the animation frame rate
 
     # Perform the actual dice roll
-    roll_result = roll_dice(dice_type)
+    roll_result = dice_roller.roll_dice(dice_type)
 
     # Display the final dice image based on the roll result
-    final_dice_image = dice_images[roll_result - 1]
-    final_dice_rect = final_dice_image.get_rect(center=(window_width // 2, window_height // 2))
-    window.blit(final_dice_image, final_dice_rect)
+    if 1 <= roll_result <= 6:
+        final_dice_image = dice_sets[dice_color][roll_result - 1]
+        final_dice_rect = final_dice_image.get_rect(center=(window_width // 2, window_height // 2))
+        window.blit(final_dice_image, final_dice_rect)
+    else:
+        # Handle invalid roll result
+        print(f"Invalid roll result: {roll_result}")
+
     pygame.display.flip()
 
     # Wait for a short duration to display the final result
     pygame.time.delay(1000)
 
     return roll_result
+
+# Example dice roll data
+dice_roll_data = {
+    'type': '2d6+1d4',  # Roll two six-sided dice and one four-sided die
+    'target': 10,
+    'success': {'details': 'You succeeded!'},
+    'failure': {'details': 'You failed.'}
+}
+
+def main():
+    # Create a DiceRoller instance
+    dice_roller = DiceRoller()
+    dice_color = 'red'  # Set the initial dice color to 'red'
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    # Perform a dice roll when the space bar is pressed
+                    outcome = perform_dice_roll(dice_roll_data, dice_roller, dice_color)
+                    print(f"Roll result: {outcome['roll_result']}")
+                    print(f"Outcome: {outcome['details']}")
+                elif event.key == pygame.K_r:
+                    dice_color = 'red'
+                elif event.key == pygame.K_w:
+                    dice_color = 'white'
+                elif event.key == pygame.K_b:
+                    dice_color = 'blue'
+                elif event.key == pygame.K_k:
+                    dice_color = 'black'
+
+    pygame.quit()
+
+if __name__ == "__main__":
+    main()
