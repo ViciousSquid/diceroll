@@ -1,6 +1,0 @@
-The dice_sets dictionary is created to store the lists of dice images for each color (red, white, blue, and black).
-The dice images are loaded into their respective color lists in the dice_sets dictionary. The script expects the dice images to be in subfolders named red, white, blue, and black inside the images directory.
-The animate_dice_roll function now takes an additional parameter dice_color to specify the color of the dice set to use. It retrieves the random dice images from the corresponding color list in dice_sets.
-The perform_dice_roll function also takes an additional parameter dice_color and passes it to the animate_dice_roll function.
-In the main function, the initial dice_color is set to 'red'.
-Additional keyboard events are handled in the main function to change the dice_color based on the pressed key ('r' for red, 'w' for white, 'b' for blue, and 'k' for black).
