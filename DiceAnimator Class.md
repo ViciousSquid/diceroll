@@ -50,6 +50,4 @@ roll_result = dice_animator.run_animation("2d6", target=7)
 print(roll_result)
 ```
 
-## Further Example:
-
 
