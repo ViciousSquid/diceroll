@@ -2,6 +2,10 @@ Work in progress
 
 A library for rolling and animating dice using Pygame
 
+=============
+run the script, a Pygame window should open. Press the space bar to trigger a dice roll animation with the initial red dice set. You can press the 'r', 'w', 'b', or 'k' keys to switch the dice set color to red, white, blue, or black, respectively. The roll result and outcome details will be printed to the console.
+===========
+
 Explanation:
 
 The roll_dice function takes a dice_type parameter, which represents the type of dice to roll (e.g., "d6" for a six-sided die).
