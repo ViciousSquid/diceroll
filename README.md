@@ -1,17 +1,22 @@
-Introduction
-This application provides a set of classes and functions to handle dice rolling functionality. It allows you to roll one or more dice of various types and determine the outcome based on a target number. Additionally, an optional animation feature is available to visualize the dice roll using the Pygame library.
+### Introduction
 
-The main components of this application are:
+This library provides a set of classes and functions to handle dice rolling functionality.
+It allows you to roll one or more dice of various types and determine the outcome based on a target number.
+Additionally, an optional animation feature is available to visualize the dice roll using the Pygame library.
 
-<code style="color : name_color">DiceRoller</code> class: Encapsulates the dice rolling functionality and maintains the state of the last roll.
+**The main components of this application are:**
 
-<code style="color : name_color">__init__()</code> Initializes a new instance of the <code style="color : name_color">DiceRoller</code> class with the <code style="color : name_color">last_roll_total</code> and <code style="color : name_color">last_roll_details</code> set to <code style="color : name_color">none</code>
+<code style="color : name_color">**DiceRoller**</code> class: Encapsulates the dice rolling functionality and maintains the state of the last roll.
 
-Determines the outcome of a dice roll based on the target number and outcome details.
+<code style="color : name_color">**__init__**()</code> Initializes a new instance of the <code style="color : name_color">DiceRoller</code> class with the <code style="color : name_color">last_roll_total</code> and <code style="color : name_color">last_roll_details</code> set to <code style="color : name_color">none</code>
 
-<code style="color : name_color">DiceRoller</code> function: A utility function that performs a dice roll and returns the result and outcome details if a target is provided.
+<code style="color : name_color">**roll_dice**(dice_type)</code>  Rolls one or more dice of the specified type and returns the sum of the results.
+Updates the <code style="color : name_color">last_roll_total</code> and <code style="color : name_color">last_roll_details</code> attributes.
+dice_type: A string representing the type of dice to roll (e.g., "2d6" or "3d8+1d4" for a combination of dice).
 
-<code style="color : name_color">DiceAnimator</code> class (optional): Provides a visual animation of the dice roll using the Pygame library.
+<code style="color : name_color">**DiceRoller**</code> function: A utility function that performs a dice roll and returns the result and outcome details if a target is provided.
+
+<code style="color : name_color">**DiceAnimator**</code> class (optional): Provides a visual animation of the dice roll using the Pygame library.
 
 Installation
 
