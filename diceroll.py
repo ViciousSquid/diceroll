@@ -87,10 +87,12 @@ def animate_dice_roll(dice_type):
         int: The result of the dice roll.
     """
     clock = pygame.time.Clock()
-    roll_duration = 2  # Duration of the dice roll animation in seconds
+    shake_duration = 1.5  # Duration of the shaking animation in seconds
+    tumble_duration = 0.5  # Duration of the tumbling animation in seconds
 
+    # Shaking animation
     start_time = time.time()
-    while time.time() - start_time < roll_duration:
+    while time.time() - start_time < shake_duration:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -98,13 +100,39 @@ def animate_dice_roll(dice_type):
 
         window.fill((255, 255, 255))  # Clear the window with a white background
 
-        # Display a random dice image
+        # Display a random dice image with a slight rotation and offset
         dice_image = random.choice(dice_images)
         dice_rect = dice_image.get_rect(center=(window_width // 2, window_height // 2))
-        window.blit(dice_image, dice_rect)
+        rotation_angle = random.randint(-10, 10)
+        offset_x = random.randint(-10, 10)
+        offset_y = random.randint(-10, 10)
+        rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
+        rotated_dice_rect = rotated_dice_image.get_rect(center=(window_width // 2 + offset_x, window_height // 2 + offset_y))
+        window.blit(rotated_dice_image, rotated_dice_rect)
 
         pygame.display.flip()  # Update the display
-        clock.tick(10)  # Limit the animation frame rate
+        clock.tick(20)  # Limit the animation frame rate
+
+    # Tumbling animation
+    start_time = time.time()
+    while time.time() - start_time < tumble_duration:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+
+        window.fill((255, 255, 255))  # Clear the window with a white background
+
+        # Display a random dice image with a rotation
+        dice_image = random.choice(dice_images)
+        dice_rect = dice_image.get_rect(center=(window_width // 2, window_height // 2))
+        rotation_angle = (time.time() - start_time) / tumble_duration * 360
+        rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
+        rotated_dice_rect = rotated_dice_image.get_rect(center=(window_width // 2, window_height // 2))
+        window.blit(rotated_dice_image, rotated_dice_rect)
+
+        pygame.display.flip()  # Update the display
+        clock.tick(60)  # Limit the animation frame rate
 
     # Perform the actual dice roll
     roll_result = roll_dice(dice_type)
