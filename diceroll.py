@@ -257,9 +257,9 @@ def roll_with_animation(dice_type, dice_color='blue', target=None, success_outco
     # If no target or outcome details are provided, return only the roll result
     return {'roll_result': roll_result}
 
-# Example usage
+# Example usage:
+# If no args are passed the default action will be:
 # Roll 2d6+1d4 with a target of 10, success outcome, and failure outcome
-print("Demo: Rolling 2d6+1d4 with a target of 10")
 result = roll_with_animation('2d6+1d4', target=10, success_outcome={'details': 'You succeeded!'}, failure_outcome={'details': 'You failed.'})
 print(f"Roll result: {result['roll_result']}")
 print(f"Outcome: {result['outcome']['details']}")
