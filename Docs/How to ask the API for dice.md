@@ -1,4 +1,4 @@
-To make a call through the DiceAPI asking for a **blue-colored dice** and a **roll of 2d6**, you would use the roll_dice method of the DiceAPI class. Here's an example of how you could do it:
+To make a call through the DiceAPI asking for **blue-coloured dice** and a **roll of 2d6**, you would use the roll_dice method of the DiceAPI class. Here's an example of how you could do it:
 
 First, you need to import the `DiceAPI` class from the `diceroll.dice_api` module:
 
