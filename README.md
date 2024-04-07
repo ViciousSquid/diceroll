@@ -14,7 +14,11 @@ Additionally, an optional animation feature is available to visualize the dice r
 Updates the <code style="color : name_color">last_roll_total</code> and <code style="color : name_color">last_roll_details</code> attributes.
 dice_type: A string representing the type of dice to roll (e.g., "2d6" or "3d8+1d4" for a combination of dice).
 
-<code style="color : name_color">**DiceRoller**</code> function: A utility function that performs a dice roll and returns the result and outcome details if a target is provided.
+Returns: An integer representing the sum of the dice roll results.
+
+Raises <code style="color : name_color">ValueError</code> if an invalid dice type is provided.
+
+<code style="color : name_color">**get_last_roll_total()**</code> function:  Returns the total of the last dice roll, or <code style="color : name_color">None</code>
 
 <code style="color : name_color">**DiceAnimator**</code> class (optional): Provides a visual animation of the dice roll using the Pygame library.
 
