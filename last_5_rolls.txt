@@ -1,0 +1,20 @@
+Result 1:
+  Dice Type: 2d6
+  Roll Result: 5
+  Roll Details: [2, 3]
+
+Result 2:
+  Dice Type: 1d20
+  Roll Result: 9
+  Roll Details: [9]
+
+Result 3:
+  Dice Type: 3d8+1d4
+  Roll Result: 16
+  Roll Details: [2, 5, 5, 4]
+
+Result 4:
+  Dice Type: 2d10
+  Roll Result: 11
+  Roll Details: [6, 5]
+
