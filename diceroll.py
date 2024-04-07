@@ -8,8 +8,8 @@ import re
 pygame.init()
 
 # Set up the window
-window_width = 600
-window_height = 600
+window_width = 300
+window_height = 300
 window = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption("Dice Roll")
 
@@ -31,6 +31,9 @@ for color in ['red', 'white', 'blue', 'black']:
 # If no dice sets are found, raise an error
 if not dice_sets:
     raise ValueError("No dice image sets found in the 'images' directory.")
+
+# Define font for text rendering
+font = pygame.font.Font(None, 36)
 
 class DiceRoller:
     """
@@ -119,46 +122,31 @@ def determine_outcome(roll_result, target, success_outcome, failure_outcome):
     outcome['roll_result'] = roll_result
     return outcome
 
-def perform_dice_roll(dice_roll_data, dice_roller, dice_color):
-    """
-    Performs a dice roll based on the provided dice roll data and determines the outcome.
-    Uses the DiceRoller instance to perform the roll and retrieve the last roll total.
-
-    Args:
-        dice_roll_data (dict): The dice roll data from the story JSON.
-        dice_roller (DiceRoller): An instance of the DiceRoller class.
-        dice_color (str): The color of the dice set to use (e.g., "red", "white", "blue", or "black").
-
-    Returns:
-        dict: The outcome details based on the dice roll result.
-    """
-    dice_type = dice_roll_data['type']
-    target = dice_roll_data['target']
-    success_outcome = dice_roll_data['success']
-    failure_outcome = dice_roll_data['failure']
-
-    # Animate the dice roll
-    roll_result = animate_dice_roll(dice_type, dice_color, dice_roller)
-
-    outcome = determine_outcome(roll_result, target, success_outcome, failure_outcome)
-    return outcome
-
-def animate_dice_roll(dice_type, dice_color, dice_roller):
+def animate_dice_roll(dice_type, dice_color, dice_roller, target=None):
     """
     Animates the dice roll in the Pygame window.
     Uses the DiceRoller instance to perform the actual roll.
+    Always displays the animation for a single die, regardless of the number of dice specified.
 
     Args:
-        dice_type (str): The type of dice to roll (e.g., "2d6" or "2d6+1d4" for a combination of dice).
+        dice_type (str): The type of dice to roll (e.g., "2d6" or "3d8+1d4" for a combination of dice).
         dice_color (str): The color of the dice set to use (e.g., "red", "white", "blue", or "black").
         dice_roller (DiceRoller): An instance of the DiceRoller class.
+        target (int, optional): The target number to beat. If provided, the function will display the dice type and target.
 
     Returns:
         int: The result of the dice roll.
     """
     clock = pygame.time.Clock()
-    shake_duration = 2.0  # Duration of the shaking animation in seconds
-    tumble_duration = 1.0  # Duration of the tumbling animation in seconds
+    shake_duration = 0.75  # Duration of the shaking animation in seconds
+    tumble_duration = 0.25  # Duration of the tumbling animation in seconds
+
+    # Render the dice type and target text
+    dice_and_target_text = f"{dice_type}"
+    if target:
+        dice_and_target_text += f"-{target}"
+    dice_and_target_render = font.render(dice_and_target_text, True, (0, 0, 0))
+    dice_and_target_rect = dice_and_target_render.get_rect(midtop=(window_width // 2, 10))
 
     # Shaking animation
     start_time = time.time()
@@ -170,25 +158,18 @@ def animate_dice_roll(dice_type, dice_color, dice_roller):
 
         window.fill((255, 255, 255))  # Clear the window with a white background
 
-        # Display random dice images with a slight rotation and offset
-        dice_components = re.split(r'(\d+d\d+)', dice_type)
-        num_dice = sum(int(component.split('d')[0]) for component in dice_components if component.endswith('d'))
-        dice_images = [random.choice(dice_sets[dice_color]) for _ in range(num_dice)]
-        dice_rects = []
-        for i, dice_image in enumerate(dice_images):
-            dice_rect = dice_image.get_rect()
-            dice_rect.center = (
-                window_width // 2 + (i - (num_dice - 1) / 2) * (dice_rect.width + 10),
-                window_height // 2,
-            )
-            rotation_angle = random.randint(-20, 20)
-            offset_x = random.randint(-20, 20)
-            offset_y = random.randint(-20, 20)
-            rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
-            rotated_dice_rect = rotated_dice_image.get_rect(center=dice_rect.center)
-            rotated_dice_rect.move_ip(offset_x, offset_y)
-            window.blit(rotated_dice_image, rotated_dice_rect)
-            dice_rects.append(rotated_dice_rect)
+        # Display the dice type and target text
+        window.blit(dice_and_target_render, dice_and_target_rect)
+
+        # Display a random dice image with a slight rotation and offset
+        dice_image = random.choice(dice_sets[dice_color])
+        dice_rect = dice_image.get_rect(center=(window_width // 2, window_height // 2))
+        rotation_angle = random.randint(-5, 5)
+        offset_x = random.randint(-5, 5)
+        offset_y = random.randint(-5, 5)
+        rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
+        rotated_dice_rect = rotated_dice_image.get_rect(center=(window_width // 2 + offset_x, window_height // 2 + offset_y))
+        window.blit(rotated_dice_image, rotated_dice_rect)
 
         pygame.display.flip()  # Update the display
         clock.tick(30)  # Limit the animation frame rate
@@ -203,85 +184,85 @@ def animate_dice_roll(dice_type, dice_color, dice_roller):
 
         window.fill((255, 255, 255))  # Clear the window with a white background
 
-        # Display random dice images with a rotation
-        dice_images = [random.choice(dice_sets[dice_color]) for _ in range(num_dice)]
-        dice_rects = []
-        for i, dice_image in enumerate(dice_images):
-            dice_rect = dice_image.get_rect()
-            dice_rect.center = (
-                window_width // 2 + (i - (num_dice - 1) / 2) * (dice_rect.width + 10),
-                window_height // 2,
-            )
-            rotation_angle = (time.time() - start_time) / tumble_duration * 360 * 2  # Rotate faster
-            rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
-            rotated_dice_rect = rotated_dice_image.get_rect(center=dice_rect.center)
-            window.blit(rotated_dice_image, rotated_dice_rect)
-            dice_rects.append(rotated_dice_rect)
+        # Display the dice type and target text
+        window.blit(dice_and_target_render, dice_and_target_rect)
+
+        # Display a random dice image with a rotation
+        dice_image = random.choice(dice_sets[dice_color])
+        dice_rect = dice_image.get_rect(center=(window_width // 2, window_height // 2))
+        rotation_angle = (time.time() - start_time) / tumble_duration * 360
+        rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
+        rotated_dice_rect = rotated_dice_image.get_rect(center=(window_width // 2, window_height // 2))
+        window.blit(rotated_dice_image, rotated_dice_rect)
 
         pygame.display.flip()  # Update the display
         clock.tick(60)  # Limit the animation frame rate
 
     # Perform the actual dice roll
     roll_result = dice_roller.roll_dice(dice_type)
-    roll_details = dice_roller.get_last_roll_details()
 
-    # Display the final dice images based on the roll result
+    # Get the first individual roll result (for displaying a single die)
+    roll_details = dice_roller.get_last_roll_details()
+    single_roll_result = roll_details[0]
+
+    # Display the final dice image and result
     window.fill((255, 255, 255))  # Clear the window with a white background
-    for i, roll in enumerate(roll_details):
-        final_dice_image = dice_sets[dice_color][roll - 1]
-        final_dice_rect = final_dice_image.get_rect()
-        final_dice_rect.center = (
-            window_width // 2 + (i - (num_dice - 1) / 2) * (final_dice_rect.width + 10),
-            window_height // 2,
-        )
-        window.blit(final_dice_image, final_dice_rect)
+
+    # Display the dice type and target text
+    window.blit(dice_and_target_render, dice_and_target_rect)
+
+    # Display the final dice image
+    final_dice_image = dice_sets[dice_color][single_roll_result - 1]
+    final_dice_rect = final_dice_image.get_rect(center=(window_width // 2, window_height // 2))
+    window.blit(final_dice_image, final_dice_rect)
+
+    # Render and display the roll result text
+    result_text = font.render(str(roll_result), True, (0, 0, 0))
+    result_rect = result_text.get_rect(midbottom=(window_width // 2, window_height - 10))
+    window.blit(result_text, result_rect)
 
     pygame.display.flip()
 
-    # Wait for a short duration to display the final result
-    pygame.time.delay(2000)
+    # Wait for a longer duration to display the final result
+    pygame.time.delay(3000)
 
     return roll_result
 
-print("++ diceroll")
-print("DEMO: Press space bar to roll 2d6+1d4 with a target of 10")
-# Example dice roll data
-dice_roll_data = {
-    'type': '2d6+1d4',  # Roll two six-sided dice and one four-sided die
-    'target': 10,
-    'success': {'details': 'You succeeded!'},
-    'failure': {'details': 'You failed.'}
-}
+def roll_with_animation(dice_type, dice_color='blue', target=None, success_outcome=None, failure_outcome=None):
+    """
+    Performs a dice roll with the specified parameters and displays the dice animation.
+    Returns the roll result and outcome details.
 
-def main():
+    Args:
+        dice_type (str): The type of dice to roll (e.g., "2d6" or "3d8+1d4" for a combination of dice).
+        dice_color (str, optional): The color of the dice set to use (e.g., "red", "white", "blue", or "black"). Default is 'blue'.
+        target (int, optional): The target number to beat. If provided, the function will return the outcome details.
+        success_outcome (dict, optional): The outcome details if the roll is successful. Required if `target` is provided.
+        failure_outcome (dict, optional): The outcome details if the roll is a failure. Required if `target` is provided.
+
+    Returns:
+        dict: A dictionary containing the roll result and, if `target` is provided, the outcome details.
+    """
     # Create a DiceRoller instance
     dice_roller = DiceRoller()
 
-    # Set the initial dice color based on the available dice sets
-    available_colors = list(dice_sets.keys())
-    dice_color = available_colors[0]
+    # Animate the dice roll
+    roll_result = animate_dice_roll(dice_type, dice_color, dice_roller, target)
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    # Perform a dice roll when the space bar is pressed
-                    outcome = perform_dice_roll(dice_roll_data, dice_roller, dice_color)
-                    print(f"Roll result: {outcome['roll_result']}")
-                    print(f"Outcome: {outcome['details']}")
-                elif event.key == pygame.K_r and 'red' in dice_sets:
-                    dice_color = 'red'
-                elif event.key == pygame.K_w and 'white' in dice_sets:
-                    dice_color = 'white'
-                elif event.key == pygame.K_b and 'blue' in dice_sets:
-                    dice_color = 'blue'
-                elif event.key == pygame.K_k and 'black' in dice_sets:
-                    dice_color = 'black'
+    # Determine the outcome if target and outcome details are provided
+    if target is not None and success_outcome is not None and failure_outcome is not None:
+        outcome = determine_outcome(roll_result, target, success_outcome, failure_outcome)
+        return {'roll_result': roll_result, 'outcome': outcome}
 
-    pygame.quit()
+    # If no target or outcome details are provided, return only the roll result
+    return {'roll_result': roll_result}
 
-if __name__ == "__main__":
-    main()
+# Example usage
+# Roll 2d6+1d4 with a target of 10, success outcome, and failure outcome
+print("Demo: Rolling 2d6+1d4 with a target of 10")
+result = roll_with_animation('2d6+1d4', target=10, success_outcome={'details': 'You succeeded!'}, failure_outcome={'details': 'You failed.'})
+print(f"Roll result: {result['roll_result']}")
+print(f"Outcome: {result['outcome']['details']}")
+
+# Note: Only the blue dice image files need to be included for this library to work,
+# as a space-saving measure for other projects that may use this library.
