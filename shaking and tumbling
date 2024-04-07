@@ -16,3 +16,17 @@ The final dice image based on the roll result is displayed, and there is a short
 when you run the perform_dice_roll function, you will see the dice shaking and tumbling before settling on the final numbers.
 
 Adjust the shake_duration and tumble_duration values to customize the animation durations according to your preference
+
+The perform_dice_roll function now accepts two additional boolean parameters: shake_dice and tumble_dice. 
+These flags control whether the shaking and tumbling animations are enabled or disabled. By default, both animations are enabled.
+
+ animate_dice_roll function takes the shake_dice and tumble_dice flags as parameters. The shaking and tumbling animations are executed conditionally based on these flags.
+When displaying the final dice image based on the roll result, a check is added to ensure that roll_result is not None before accessing the corresponding image from the dice_images list.
+
+ERROR HANDLING:
+
+Error handling is added in several places:
+When loading dice images, a try-except block is used to catch any pygame.error exceptions. If an error occurs, an appropriate error message is printed, and the program exits.
+In the roll_dice function, a try-except block is used to catch ValueError and IndexError exceptions that may occur when parsing the dice_type string. If an invalid dice type is provided, an error message is printed, and None is returned.
+In the perform_dice_roll function, a try-except block is used to catch KeyError exceptions that may occur when accessing the required keys in the dice_roll_data dictionary. If a required key is missing, an error message is printed, and None is returned.
+The determine_outcome function now checks if the roll_result is None before determining the outcome. If roll_result is None, the function returns None.
