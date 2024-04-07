@@ -12,6 +12,8 @@ Additionally, an optional animation feature is available to visualize the dice r
 
 Full Documenation is included https://github.com/ViciousSquid/diceroll/tree/main/Docs
 
+### Source is divided into 3 files:
+
 
 <code style="color : name_color">diceroll.py</code> : Contains the DiceRoller and OutcomeDeterminer classes, as well as the roll_dice function.
 
