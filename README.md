@@ -1,7 +1,10 @@
 ### Introduction
 
 This versatile library offers a comprehensive set of tools for handling dice rolling operations across various scenarios. Its core strength lies in the ability to roll any combination of dice types effortlessly, making it invaluable for applications that require random number generation based on dice mechanics, such as games, simulations, or projects requiring dice-driven randomness.
+
 Additionally, Users can define target numbers and preset success/failure outcomes, allowing the library to intelligently analyze roll results and provide corresponding outcome details. This feature is particularly useful in scenarios where specific outcomes need to be determined based on the dice rolls.
+
+
 
 <code style="color : name_color">**DiceRoller**</code> class: This class encapsulates the core functionality of rolling dice and maintaining the state of the last roll.
 
