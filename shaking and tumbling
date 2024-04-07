@@ -1,0 +1,18 @@
+The animate_dice_roll function includes two separate animation phases: shaking and tumbling.
+The shaking animation is performed for a specified duration (shake_duration). During this phase:
+The window is cleared with a white background.
+A random dice image is selected and displayed with a slight rotation and offset.
+The rotation angle and offset values are randomly generated to create a shaking effect.
+The rotated dice image is blitted onto the window at the adjusted position.
+The display is updated, and the animation frame rate is limited to 20 FPS.
+The tumbling animation is performed for a specified duration (tumble_duration). During this phase:
+The window is cleared with a white background.
+A random dice image is selected and displayed with a rotation.
+The rotation angle is calculated based on the elapsed time and the total tumble duration, creating a continuous tumbling effect.
+The rotated dice image is blitted onto the window at the center position.
+The display is updated, and the animation frame rate is limited to 60 FPS.
+After the shaking and tumbling animations, the actual dice roll is performed using the roll_dice function.
+The final dice image based on the roll result is displayed, and there is a short delay to show the final result before returning the roll result.
+when you run the perform_dice_roll function, you will see the dice shaking and tumbling before settling on the final numbers.
+
+Adjust the shake_duration and tumble_duration values to customize the animation durations according to your preference
