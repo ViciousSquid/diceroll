@@ -4,13 +4,13 @@ This versatile library offers a comprehensive set of tools for handling dice rol
 
 Additionally, Users can define target numbers and preset success/failure outcomes, allowing the library to intelligently analyze roll results and provide corresponding outcome details. This feature is particularly useful in scenarios where specific outcomes need to be determined based on the dice rolls.
 
-
-
 <code style="color : name_color">**DiceRoller**</code> class: This class encapsulates the core functionality of rolling dice and maintaining the state of the last roll.
 
 <code style="color : name_color">**OutcomeDeterminer**</code> class: This class determines the outcome of a dice roll based on a target number and predefined success/failure outcomes.
 
 <code style="color : name_color">**roll_dice**</code> function: This is a utility function that combines the functionality of <code style="color : name_color">DiceRoller</code> and <code style="color : name_color">OutcomeDeterminer</code> to perform a dice roll and return the result and outcome (if a target is provided).
+
+Core functionality is exposed as an API allowing rolling functionality, retrieve roll results, dice types, and colours
 
 Full Documenation is included https://github.com/ViciousSquid/diceroll/tree/main/Docs
 
