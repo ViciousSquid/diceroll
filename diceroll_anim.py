@@ -1,5 +1,5 @@
-from diceroll import DiceRoller
-from dice_api import DiceAPI
+from .diceroll import DiceRoller
+from .dice_api import DiceAPI
 import random
 import pygame
 import time
@@ -7,12 +7,11 @@ import os
 from datetime import datetime
 
 class DiceAnimator:
-    def __init__(self, window_width=300, window_height=300, dice_image_path="images"):
+    def __init__(self, window_width=300, window_height=300, dice_image_path="diceroll/images"):
         pygame.init()
         self.window_width = window_width
         self.window_height = window_height
-        self.window = pygame.display.set_mode((window_width, window_height))
-        pygame.display.set_caption("Dice Roll")
+        self.window = None  # Initialize window as None
         self.dice_image_path = dice_image_path
         self.dice_sets = self.load_dice_sets()
         if not self.dice_sets:
@@ -46,6 +45,10 @@ class DiceAnimator:
 
         if dice_colour not in self.dice_sets:
             raise ValueError(f"Invalid dice colour: {dice_colour}. Available colours are: {', '.join(self.dice_sets.keys())}")
+
+        # Create the window only when needed
+        self.window = pygame.display.set_mode((self.window_width, self.window_height))
+        pygame.display.set_caption("Dice Roll")
 
         clock = pygame.time.Clock()
         shake_duration = 0.75

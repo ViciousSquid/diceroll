@@ -1,4 +1,4 @@
-from diceroll import DiceRoller
+from .diceroll import DiceRoller
 from datetime import datetime
 
 class DiceAPI:
