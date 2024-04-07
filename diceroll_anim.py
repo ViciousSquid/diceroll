@@ -1,5 +1,5 @@
-from .diceroll import DiceRoller
-from .dice_api import DiceAPI
+from diceroll import DiceRoller
+from dice_api import DiceAPI
 import random
 import pygame
 import time
