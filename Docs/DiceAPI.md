@@ -1,4 +1,4 @@
-
+https://github.com/ViciousSquid/diceroll/blob/main/Docs/How%20to%20ask%20the%20API%20for%20dice.md
 
 ### DiceAPI
 The `DiceAPI` class provides an API interface for accessing the core dice rolling functionality and retrieving roll results and dice information.
