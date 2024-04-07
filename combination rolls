@@ -1,0 +1,16 @@
+Here's what has been updated:
+
+Dice Pool and Dice Combination Rolling
+The roll_dice method in the DiceRoller class has been modified to handle rolling a combination of dice types, such as "2d6+1d4".
+The method splits the dice_type string into individual components using regular expressions.
+For each component, it extracts the number of dice and the die size, generates random rolls, and accumulates the results.
+The total roll sum and individual roll results are stored in the last_roll_total and last_roll_details instance variables, respectively.
+Critical Success/Failure Mechanics
+The determine_outcome function has been updated to check for critical success or failure based on the maximum or minimum possible roll values.
+It calculates the maximum roll value as the sum of all dice faces (e.g., 21 for 3d6) and the minimum roll value as the number of dice (e.g., 3 for 3d6).
+If the roll result matches the maximum roll value, it returns a dictionary indicating a critical success, along with the success outcome details.
+If the roll result matches the minimum roll value, it returns a dictionary indicating a critical failure, along with the failure outcome details.
+Otherwise, it determines the outcome based on the target number as before.
+With these changes, you can now roll a combination of dice types by passing a string like "2d6+1d4" to the roll_dice method. Additionally, the determine_outcome function will automatically detect and handle critical successes and failures based on the maximum and minimum possible roll values.
+
+Note that the success_outcome and failure_outcome dictionaries in the dice roll data should have a 'details' key containing the outcome details to be displayed in case of a critical success or failure.
