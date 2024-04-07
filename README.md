@@ -12,7 +12,7 @@ Additionally, Users can define target numbers and preset success/failure outcome
 
 Core functionality is exposed as an API allowing rolling functionality, retrieve roll results, dice types, and colours
 
-Full Documenation is included https://github.com/ViciousSquid/diceroll/tree/main/Docs
+Documentation: https://github.com/ViciousSquid/diceroll/tree/main/Docs
 
 ### Source is divided into 3 files:
 
