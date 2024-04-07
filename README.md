@@ -1,26 +1,28 @@
-Work in progress
+Introduction
+This application provides a set of classes and functions to handle dice rolling functionality. It allows you to roll one or more dice of various types and determine the outcome based on a target number. Additionally, an optional animation feature is available to visualize the dice roll using the Pygame library.
 
-A library for rolling and animating dice using Pygame
+The main components of this application are:
 
+<code style="color : name_color">DiceRoller</code> class: Encapsulates the dice rolling functionality and maintains the state of the last roll.
 
-* run the script, a Pygame window should open. Press the space bar to trigger a dice roll animation with the initial red dice set. You can press the 'r', 'w', 'b', or 'k' keys to switch the dice set color to red, white, blue, or black, respectively. The roll result and outcome details will be printed to the console.
+<code style="color : name_color">__init__()</code> Initializes a new instance of the <code style="color : name_color">DiceRoller</code> class with the <code style="color : name_color">last_roll_total</code> and <code style="color : name_color">last_roll_details</code> set to <code style="color : name_color">none</code>
 
+Determines the outcome of a dice roll based on the target number and outcome details.
 
-Explanation:
+<code style="color : name_color">DiceRoller</code> function: A utility function that performs a dice roll and returns the result and outcome details if a target is provided.
 
-The roll_dice function takes a dice_type parameter, which represents the type of dice to roll (e.g., "d6" for a six-sided die).
-It extracts the number of sides from the dice_type string and generates a random number between 1 and the number of sides (inclusive) using random.randint(). This simulates rolling the dice and returns the result.
+<code style="color : name_color">DiceAnimator</code> class (optional): Provides a visual animation of the dice roll using the Pygame library.
 
-The determine_outcome function takes the roll_result, target, success_outcome, and failure_outcome as parameters.
-It compares the roll_result with the target number. If the roll_result is greater than or equal to the target, it considers the outcome a success and returns the success_outcome. 
-Otherwise, it considers the outcome a failure and returns the failure_outcome.
+Installation
 
-The perform_dice_roll function is the main entry point for performing a dice roll.
-It takes the dice_roll_data dictionary from the story JSON as a parameter. 
-This dictionary contains the necessary information for the dice roll, such as the dice type, target number, success outcome, and failure outcome.
-The function extracts the required information from the dice_roll_data dictionary and calls the roll_dice function to obtain the roll result.
-It then calls the determine_outcome function to determine the outcome based on the roll result and the target number.
-Finally, it adds the roll_result to the outcome dictionary for display purposes and returns the outcome.
+Usage
+The DiceRoller Class
+The DiceRoller class encapsulates the dice rolling functionality and maintains the state of the last roll. It provides the following methods:
 
-To use diceroll.py module in your application, you can import the perform_dice_roll function and call it with the appropriate dice_roll_data whenever a dice roll is required.
-The function will return the outcome details based on the dice roll result, which you can then use to update the room description, exits, or any other relevant information in your game.
+__init__(): Initializes a new instance of the DiceRoller class with the last_roll_total and last_roll_details set to None.
+roll_dice(dice_type): Rolls one or more dice of the specified type and returns the sum of the results. Updates the last_roll_total and last_roll_details attributes.
+dice_type: A string representing the type of dice to roll (e.g., "2d6" or "3d8+1d4" for a combination of dice).
+Returns: An integer representing the sum of the dice roll results.
+Raises ValueError if an invalid dice type is provided.
+get_last_roll_total(): Returns the total of the last dice roll, or None if no roll has been performed yet.
+get_last_roll_details(): Returns the individual results of the last dice roll as a list, or None if no roll has been performed yet.
