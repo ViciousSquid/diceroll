@@ -2,7 +2,7 @@
 
 
 
-**diceroll** is a Python library that provides API functionality [(DiceAPI)](https://github.com/ViciousSquid/diceroll/blob/main/Docs/DiceAPI.md) for simulating dice rolls and performing dice-related operations. It includes classes for rolling dice, tracking & saving roll results, and animating dice rolls using Pygame. More features are being added as need arises.
+**diceroll** is a Python library that provides API functionality ([dicerollAPI](https://github.com/ViciousSquid/diceroll/edit/main/README.md)) for simulating dice rolls and performing dice-related operations. It includes classes for rolling dice, tracking & saving roll results, and animating dice rolls using Pygame. More features are being added as need arises.
 
 This library and API were specifically designed for and alongside the **Adventure!** *Interactive story engine* : https://github.com/ViciousSquid/Adventure
 
