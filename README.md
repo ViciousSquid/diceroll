@@ -26,15 +26,15 @@ Further Documentation: https://github.com/ViciousSquid/diceroll/tree/main/Docs
 ### Source files:
 
 
-<code style="color : name_color">diceroll.py</code> : Contains the `DiceRoller` and `OutcomeDeterminer` classes, as well as the `roll_dice` function.
+`diceroll.py` : Contains the `DiceRoller` and `OutcomeDeterminer` classes, as well as the `roll_dice` function.
 
-<code style="color : name_color">diceroll_anim.py</code> : Contains the `DiceAnimator` class, which handles the dice roll animation using the Pygame library.
+`diceroll_anim.py` : Contains the `DiceAnimator` class, which handles the dice roll animation using the Pygame library.
 
-<code style="color : name_color">diceroll_api.py</code> : Exposes `dicerollAPI` classes and defs
+`diceroll_api.py` : Exposes `dicerollAPI` classes and defs
 
-<code style="color : name_color">roll_dice_example.py</code> : A script that demonstrates the usage of the `roll_dice` function in the console without animation.
+`roll_dice_example.py` : A script that demonstrates the usage of the `roll_dice` function in the console without animation.
 
-<code style="color : name_color">roll_dice_example_gui.py</code> : A script that demonstrates the usage of the `roll_dice` function with a GUI and animations (requires pygame)
+`roll_dice_example_gui.py` : A script that demonstrates the usage of the `roll_dice` function with a GUI and animations (requires pygame)
 
 
 
