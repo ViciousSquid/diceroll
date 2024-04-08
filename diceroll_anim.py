@@ -1,5 +1,5 @@
 from diceroll import DiceRoller
-from dice_api import DiceAPI
+from diceroll_api import dicerollAPI, DiceColor, AnimationStyle
 import random
 import pygame
 import time
@@ -11,50 +11,54 @@ class DiceAnimator:
         pygame.init()
         self.window_width = window_width
         self.window_height = window_height
-        self.window = None  # Initialize window as None
+        self.window = None
         self.dice_image_path = dice_image_path
         self.dice_sets = self.load_dice_sets()
         if not self.dice_sets:
             raise ValueError(f"No dice image sets found in the '{dice_image_path}' directory.")
         self.font = pygame.font.Font(None, 36)
+        self.animation_speed = 1.0
+        self.custom_dice_faces = {}
+        self.success_animation = None
+        self.failure_animation = None
+        self.animation_style = AnimationStyle.SHAKE
 
     def load_dice_sets(self):
         dice_sets = {}
 
         today = datetime.today()
         if (today.month == 10 and today.day == 31) or (today.month == 4 and today.day == 1):
-            colours = ['bread']
+            colors = ['bread']
         else:
-            colours = ['red', 'white', 'blue', 'black']
+            colors = [DiceColor.RED, DiceColor.WHITE, DiceColor.BLUE, DiceColor.BLACK]
 
-        for colour in colours:
+        for color in colors:
             dice_set = []
             for i in range(1, 7):
-                image_path = os.path.join(self.dice_image_path, colour, f"dice{i}.jpg")
+                image_path = os.path.join(self.dice_image_path, color, f"dice{i}.jpg")
                 if os.path.exists(image_path):
                     dice_set.append(pygame.image.load(image_path))
             if dice_set:
-                dice_sets[colour] = dice_set
+                dice_sets[color] = dice_set
 
         return dice_sets
 
-    def animate_dice_roll(self, dice_type, dice_colour, dice_roller, target=None):
+    def animate_dice_roll(self, dice_notation, dice_color, dice_roller, target=None):
         today = datetime.today()
         if (today.month == 10 and today.day == 31) or (today.month == 4 and today.day == 1):
-            dice_colour = 'bread'
+            dice_color = 'bread'
 
-        if dice_colour not in self.dice_sets:
-            raise ValueError(f"Invalid dice colour: {dice_colour}. Available colours are: {', '.join(self.dice_sets.keys())}")
+        if dice_color not in self.dice_sets:
+            raise ValueError(f"Invalid dice color: {dice_color}. Available colors are: {', '.join(self.dice_sets.keys())}")
 
-        # Create the window only when needed
         self.window = pygame.display.set_mode((self.window_width, self.window_height))
         pygame.display.set_caption("Dice Roll")
 
         clock = pygame.time.Clock()
-        shake_duration = 0.75
-        tumble_duration = 0.25
+        shake_duration = 0.75 / self.animation_speed
+        tumble_duration = 0.25 / self.animation_speed
 
-        dice_and_target_text = f"{dice_type}"
+        dice_and_target_text = f"{dice_notation}"
         if target:
             dice_and_target_text += f"-{target}"
         dice_and_target_render = self.font.render(dice_and_target_text, True, (0, 0, 0))
@@ -71,41 +75,35 @@ class DiceAnimator:
 
             self.window.blit(dice_and_target_render, dice_and_target_rect)
 
-            dice_image = random.choice(self.dice_sets[dice_colour])
+            if dice_notation in self.custom_dice_faces:
+                dice_image = random.choice(self.custom_dice_faces[dice_notation])
+            else:
+                dice_image = random.choice(self.dice_sets[dice_color])
             dice_rect = dice_image.get_rect(center=(self.window_width // 2, self.window_height // 2))
-            rotation_angle = random.randint(-5, 5)
-            offset_x = random.randint(-5, 5)
-            offset_y = random.randint(-5, 5)
-            rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
-            rotated_dice_rect = rotated_dice_image.get_rect(center=(self.window_width // 2 + offset_x, self.window_height // 2 + offset_y))
-            self.window.blit(rotated_dice_image, rotated_dice_rect)
+
+            if self.animation_style == AnimationStyle.SHAKE:
+                rotation_angle = random.randint(-5, 5)
+                offset_x = random.randint(-5, 5)
+                offset_y = random.randint(-5, 5)
+                rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
+                rotated_dice_rect = rotated_dice_image.get_rect(center=(self.window_width // 2 + offset_x, self.window_height // 2 + offset_y))
+                self.window.blit(rotated_dice_image, rotated_dice_rect)
+            elif self.animation_style == AnimationStyle.TUMBLE:
+                rotation_angle = (time.time() - start_time) / tumble_duration * 360
+                rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
+                rotated_dice_rect = rotated_dice_image.get_rect(center=(self.window_width // 2, self.window_height // 2))
+                self.window.blit(rotated_dice_image, rotated_dice_rect)
+            elif self.animation_style == AnimationStyle.SPIN:
+                rotation_angle = (time.time() - start_time) / shake_duration * 360
+                rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
+                rotated_dice_rect = rotated_dice_image.get_rect(center=(self.window_width // 2, self.window_height // 2))
+                self.window.blit(rotated_dice_image, rotated_dice_rect)
 
             pygame.display.flip()
             clock.tick(30)
 
-        start_time = time.time()
-        while time.time() - start_time < tumble_duration:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return
-
-            self.window.fill((255, 255, 255))
-
-            self.window.blit(dice_and_target_render, dice_and_target_rect)
-
-            dice_image = random.choice(self.dice_sets[dice_colour])
-            dice_rect = dice_image.get_rect(center=(self.window_width // 2, self.window_height // 2))
-            rotation_angle = (time.time() - start_time) / tumble_duration * 360
-            rotated_dice_image = pygame.transform.rotate(dice_image, rotation_angle)
-            rotated_dice_rect = rotated_dice_image.get_rect(center=(self.window_width // 2, self.window_height // 2))
-            self.window.blit(rotated_dice_image, rotated_dice_rect)
-
-            pygame.display.flip()
-            clock.tick(60)
-
-        dice_api = DiceAPI()
-        roll_result = dice_api.roll_dice(dice_type)
+        dice_api = dicerollAPI()
+        roll_result = dice_api.roll_dice(dice_notation)
 
         roll_details = dice_api.get_last_roll_details()
         single_roll_result = roll_details[0]
@@ -114,10 +112,13 @@ class DiceAnimator:
 
         self.window.blit(dice_and_target_render, dice_and_target_rect)
 
-        try:
-            final_dice_image = self.dice_sets[dice_colour][single_roll_result - 1]
-        except IndexError:
-            final_dice_image = self.dice_sets[dice_colour][0]
+        if dice_notation in self.custom_dice_faces:
+            final_dice_image = self.custom_dice_faces[dice_notation][single_roll_result - 1]
+        else:
+            try:
+                final_dice_image = self.dice_sets[dice_color][single_roll_result - 1]
+            except IndexError:
+                final_dice_image = self.dice_sets[dice_color][0]
         final_dice_rect = final_dice_image.get_rect(center=(self.window_width // 2, self.window_height // 2))
         self.window.blit(final_dice_image, final_dice_rect)
 
@@ -125,21 +126,48 @@ class DiceAnimator:
         result_rect = result_text.get_rect(midbottom=(self.window_width // 2, self.window_height - 10))
         self.window.blit(result_text, result_rect)
 
+        if target:
+            if roll_result['roll_result'] >= target and self.success_animation:
+                self.success_animation()
+            elif roll_result['roll_result'] < target and self.failure_animation:
+                self.failure_animation()
+
         pygame.display.flip()
 
         pygame.time.delay(3000)
 
         return roll_result
 
-    def run_animation(self, dice_type, dice_colour='blue', target=None, save_rolls=False):
+    def run_animation(self, dice_notation, dice_color=DiceColor.BLUE, target=None, save_rolls=False):
         today = datetime.today()
         if (today.month == 10 and today.day == 31) or (today.month == 4 and today.day == 1):
-            dice_colour = 'bread'
+            dice_color = 'bread'
 
-        available_colours = DiceAPI().get_available_dice_colours()
-        if dice_colour not in available_colours:
-            raise ValueError(f"Invalid dice colour: {dice_colour}. Available colours are: {', '.join(available_colours)}")
+        available_colors = dicerollAPI().get_available_dice_colors()
+        if dice_color not in available_colors:
+            raise ValueError(f"Invalid dice color: {dice_color}. Available colors are: {', '.join(available_colors)}")
 
         dice_roller = DiceRoller(save_rolls=save_rolls)
-        roll_result = self.animate_dice_roll(dice_type, dice_colour, dice_roller, target)
+        roll_result = self.animate_dice_roll(dice_notation, dice_color, dice_roller, target)
         return roll_result
+
+    def set_window_size(self, width, height):
+        self.window_width = width
+        self.window_height = height
+
+    def set_dice_image_path(self, path):
+        self.dice_image_path = path
+        self.dice_sets = self.load_dice_sets()
+
+    def set_animation_style(self, style):
+        self.animation_style = style
+
+    def set_animation_speed(self, speed):
+        self.animation_speed = speed
+
+    def set_custom_dice_faces(self, dice_notation, face_images):
+        self.custom_dice_faces[dice_notation] = face_images
+
+    def set_target_success_failure_animations(self, success_animation, failure_animation):
+        self.success_animation = success_animation
+        self.failure_animation = failure_animation
