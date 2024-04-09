@@ -1,3 +1,4 @@
+```python
 damage_die = "2d6"
 damage_bonus = 3
 
@@ -9,3 +10,4 @@ if attack_roll["roll_result"] >= enemy.armor_class:
     print(f"You deal {total_damage} damage!")
 else:
     print("Miss!")
+```
