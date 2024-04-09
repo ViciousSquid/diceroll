@@ -1,4 +1,4 @@
-ANSI escape codes are specified in the diceroll_api.py file:
+ANSI escape codes are specified in the `diceroll_api.py` file:
 
 ```python
  # Set console text color based on dice_color
