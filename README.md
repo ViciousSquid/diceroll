@@ -16,7 +16,7 @@ It includes classes for rolling dice, tracking & saving roll results, and animat
 - Retrieve the last 5 roll results
 - Saving throws and skillchecks
 - Set/Get the dice/font color (red, white, blue, black, green, custom)
-- Animated visualizations (optional, requires Pygame)
+- Animations (optional, requires Pygame)
 ____
 
 ## Further Documentation
