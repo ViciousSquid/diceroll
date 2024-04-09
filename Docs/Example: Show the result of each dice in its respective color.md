@@ -25,3 +25,17 @@ print('\033[0m', end='')  # Reset the color
 
 print(f"Total: {sum(result[0]['roll_result'] + result[1]['roll_result'])}")
 ```
+Here's an exmple of the output:
+
+```
+2d6 Roll Result (Blue and Green):
+Dice 1: 4
+Dice 2: 2
+Total: 6
+```
+
+2d6 Roll Result (Blue and Green):
+Dice 1: <code style="Cyan : name_color">4</code>
+Dice 2: <code style="Greenyellow : name_color">4</code>
+Total: 6
+
