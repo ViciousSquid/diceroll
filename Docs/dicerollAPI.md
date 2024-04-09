@@ -9,11 +9,13 @@ It utilizes the `DiceRoller` and `DiceAnimator` classes internally.
 
 ### Initialization:
 
-To create an instance of the `dicerollAPI`, you can optionally specify the `save_rolls` parameter to enable or disable saving roll history.
+(Optional) When creating an instance of the `dicerollAPI`, you can specify the `save_rolls` parameter to enable or disable saving roll history.
 
 ```python
 api = dicerollAPI(save_rolls=False)
 ```
+
+______
 (Optional) When you create an instance of the DiceRoller class, you can specify the `save_format` parameter to choose between saving the last 5 rolls as a text file or a JSON file. For example:
 
 ```python
@@ -28,7 +30,7 @@ If no `save_format` parameter is defined, the default will be text file (.txt)
 
 ______
 
-## Methods
+# Methods
 
 ### set_animation_window_size(width=300, height=300)
 Sets the size of the animation window.
@@ -280,7 +282,7 @@ ______
 
 
 
-## Enums
+# Enums
 `dicerollAPI` uses the following enums:
 
 
