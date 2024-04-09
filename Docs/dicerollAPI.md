@@ -5,6 +5,8 @@ The `dicerollAPI` class provides a high-level interface for rolling dice, perfor
 
 It utilizes the `DiceRoller` and `DiceAnimator` classes internally.
 
+
+
 ### Initialization:
 
 To create an instance of the `dicerollAPI`, you can optionally specify the `save_rolls` parameter to enable or disable saving roll history.
@@ -12,6 +14,17 @@ To create an instance of the `dicerollAPI`, you can optionally specify the `save
 ```python
 api = dicerollAPI(save_rolls=False)
 ```
+(Optional) When you create an instance of the DiceRoller class, you can specify the `save_format` parameter to choose between saving the last 5 rolls as a text file or a JSON file. For example:
+
+```python
+# Save last 5 rolls as a text file (default)
+dice_roller = DiceRoller(save_rolls=True)
+
+# Save last 5 rolls as a JSON file
+dice_roller = DiceRoller(save_rolls=True, save_format="json")
+```
+
+If no `save_format` parameter is defined, the default will be text file (.txt)
 
 ______
 
@@ -203,6 +216,13 @@ ______
 
 ### enable_roll_saving()
 Enables saving roll history.
+
+
+______
+
+
+### disable_roll_saving()
+Disables saving roll history.
 
 
 ______
