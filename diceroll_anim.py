@@ -6,15 +6,9 @@ import time
 import os
 from datetime import datetime
 import pygame
-pygame.init()
-print(pygame.get_sdl_version())
-screen = pygame.display.set_mode((800, 600))    #
-pygame.display.set_caption("Dice Animation")    #
-pygame.display.flip()                           #
 
 class DiceAnimator:
-    def __init__(self, window_width=300, window_height=300, dice_image_path="dice_imgs"):
-        pygame.init()
+    def __init__(self, window_width=300, window_height=300, dice_image_path="diceroll/images"):
         self.window_width = window_width
         self.window_height = window_height
         self.window = None
@@ -22,7 +16,7 @@ class DiceAnimator:
         self.dice_sets = self.load_dice_sets()
         if not self.dice_sets:
             raise ValueError(f"No dice image sets found in the '{dice_image_path}' directory.")
-        self.font = pygame.font.Font(None, 36)
+        self.font = None
         self.animation_speed = 1.0
         self.custom_dice_faces = {}
         self.success_animation = None
@@ -49,6 +43,12 @@ class DiceAnimator:
 
         return dice_sets
 
+    def initialize_pygame(self):
+        pygame.init()
+        self.window = pygame.display.set_mode((self.window_width, self.window_height))
+        pygame.display.set_caption("Dice Roll")
+        self.font = pygame.font.Font(None, 36)
+
     def animate_dice_roll(self, dice_notation, dice_color, dice_roller, target=None):
         today = datetime.today()
         if (today.month == 10 and today.day == 31) or (today.month == 4 and today.day == 1):
@@ -57,8 +57,7 @@ class DiceAnimator:
         if dice_color not in self.dice_sets:
             raise ValueError(f"Invalid dice color: {dice_color}. Available colors are: {', '.join(self.dice_sets.keys())}")
 
-        self.window = pygame.display.set_mode((self.window_width, self.window_height))
-        pygame.display.set_caption("Dice Roll")
+        self.initialize_pygame()
 
         clock = pygame.time.Clock()
         shake_duration = 0.75 / self.animation_speed
