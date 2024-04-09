@@ -1,4 +1,4 @@
-Here's an example of how you can make a call through the `dicerollAPI` to roll **2d6** with **blue**-colored dice and a target value of **7**:
+Here's an example of how you can make a call through the `dicerollAPI` to roll **2d6** with **blue** dice and a target value of **7**:
 
 ```python
 from diceroll_api import dicerollAPI, DiceColor
