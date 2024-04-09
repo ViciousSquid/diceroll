@@ -1,4 +1,7 @@
-All functions and classes documented: https://github.com/ViciousSquid/diceroll/tree/main/Docs
+* All functions and classes documented: https://github.com/ViciousSquid/diceroll/tree/main/Docs
+* The `Example1.py` and `Example2.py` files have been included in the repository for your perusal
+
+
 
 # dicerollAPI![image](https://github.com/ViciousSquid/diceroll/assets/161540961/86d8abe9-3153-4cbc-b3d9-0c4b1b20c166)
 
