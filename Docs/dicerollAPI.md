@@ -1,4 +1,4 @@
-
+All functions and classes documented: https://github.com/ViciousSquid/diceroll/tree/main/Docs
 
 ## dicerollAPI
 The `dicerollAPI` class provides a high-level interface for rolling dice, performing animations, and managing roll history. 
