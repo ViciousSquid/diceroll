@@ -13,6 +13,7 @@ To create an instance of the `dicerollAPI`, you can optionally specify the `save
 api = dicerollAPI(save_rolls=False)
 ```
 
+______
 
 ## Methods
 
@@ -21,12 +22,12 @@ Sets the size of the animation window.
 
 * `width` (int): The width of the window (default: 300).
 * `height` (int): The height of the window (default: 300).
-
+______
 ### set_dice_image_path(path="diceroll/images")
 Sets the path to the directory containing the dice images.
 
 * `path` (str): The path to the dice image directory (default: "diceroll/images")
-
+______
 ### roll_dice(dice_notation, dice_color=DiceColor.BLUE, target_value=None, animate=True)
 Rolls the specified dice and returns the roll result.
 
@@ -34,16 +35,20 @@ Rolls the specified dice and returns the roll result.
 * `dice_color` (str): The color of the dice (default: DiceColor.BLUE).
 * `target_value` (int): The target value for the roll (default: None).
 * `animate` (bool): Whether to animate the roll (default: True).
-Returns a dictionary containing the roll result, or `None` if the dice notation is invalid.
 
+  
+Returns a dictionary containing the roll result, or `None` if the dice notation is invalid.
+______
 ### roll_single_dice(dice_type, dice_color=DiceColor.BLUE, animate=True)
 Rolls a single dice of the specified type.
 
 * `dice_type` (str): The type of the dice (e.g., DiceType.D20).
 * `dice_color` (str): The color of the dice (default: DiceColor.BLUE).
 * `animate` (bool): Whether to animate the roll (default: True).
-Returns a dictionary containing the roll result.
 
+  
+Returns a dictionary containing the roll result.
+______
 ### roll_multiple_dice_of_same_type(dice_type, num_dice, dice_color=DiceColor.BLUE, animate=True)
 Rolls multiple dice of the same type.
 
@@ -51,9 +56,10 @@ Rolls multiple dice of the same type.
 * `num_dice` (int): The number of dice to roll.
 * `dice_color` (str): The color of the dice (default: DiceColor.BLUE).
 * `animate` (bool): Whether to animate the roll (default: True).
+
   
 Returns a dictionary containing the roll result.
-
+______
 
 
 ### roll_multiple_dice(dice_notations, dice_colors=None, target_values=None, animate=True)
@@ -63,9 +69,10 @@ Rolls multiple dice with different notations.
 * `dice_colors` (list): A list of dice colors (default: None).
 * `target_values` (list): A list of target values (default: None).
 * `animate` (bool): Whether to animate the rolls (default: True).
+
   
 Returns a list of dictionaries containing the roll results.
-
+______
 
 
 
@@ -73,9 +80,10 @@ Returns a list of dictionaries containing the roll results.
 Calculates the sum of the roll details.
 
 * `roll_result` (dict): The roll result dictionary.
+
   
 Returns the sum of the roll details.
-
+______
 
 
 
@@ -83,9 +91,10 @@ Returns the sum of the roll details.
 Calculates the average of the roll details.
 
 * `roll_result` (dict): The roll result dictionary.
+
   
 Returns the average of the roll details.
-
+______
 
 
 
@@ -93,9 +102,10 @@ Returns the average of the roll details.
 Returns the maximum value from the roll details.
 
 * `roll_result` (dict): The roll result dictionary.
+
   
 Returns the maximum value from the roll details.
-
+______
 
 
 
@@ -104,9 +114,10 @@ Returns the maximum value from the roll details.
 Returns the minimum value from the roll details.
 
 * `roll_result` (dict): The roll result dictionary.
+
   
 Returns the minimum value from the roll details.
-
+______
 
 
 
@@ -116,9 +127,10 @@ Retrieves the statistics for a given dice notation and number of rolls.
 
 * `dice_notation` (str): The dice notation.
 * `num_rolls` (int): The number of rolls to perform.
+
   
 Returns a dictionary containing the roll statistics.
-
+______
 
 
 
@@ -128,7 +140,7 @@ Saves the roll history to a file.
 
 * `file_path` (str): The path to the file.
 
-
+______
 
 
 
@@ -136,9 +148,10 @@ Saves the roll history to a file.
 Loads the roll history from a file.
 
 * `file_path` (str): The path to the file.
+
   
 Returns the loaded roll history.
-
+______
 
 
 
@@ -147,8 +160,9 @@ Returns the loaded roll history.
 ### get_last_roll_total()
 Retrieves the total of the last roll.
 
-Returns the total of the last roll.
 
+Returns the total of the last roll.
+______
 
 
 
@@ -156,8 +170,9 @@ Returns the total of the last roll.
 ### get_last_roll_details()
 Retrieves the details of the last roll.
 
-Returns the details of the last roll.
 
+Returns the details of the last roll.
+______
 
 
 
@@ -167,9 +182,10 @@ Returns the details of the last roll.
 ### get_last_5_rolls()
 Retrieves the last 5 rolls.
 
+
 Returns a list of the last 5 roll results.
 
-
+______
 
 
 
@@ -178,9 +194,10 @@ Returns a list of the last 5 roll results.
 ### get_available_dice_colors()
 Retrieves the available dice colors.
 
+
 Returns a list of available dice colors.
 
-
+______
 
 
 
@@ -188,14 +205,14 @@ Returns a list of available dice colors.
 Enables saving roll history.
 
 
-
+______
 
 
 ### disable_roll_saving()
 Disables saving roll history.
 
 
-
+______
 
 
 ### set_animation_style(style=AnimationStyle.SHAKE)
@@ -203,7 +220,7 @@ Sets the animation style.
 
 * `style` (str): The animation style (default: AnimationStyle.SHAKE).
 
-
+______
 
 
 
@@ -217,8 +234,9 @@ Rolls a saving throw.
 * `success_threshold` (int): The success threshold for the roll (default: None).
 * `animate` (bool): Whether to animate the roll (default: True).
   
-* Returns a dictionary containing the saving throw result.
 
+ Returns a dictionary containing the saving throw result.
+______
 
 
 
@@ -235,8 +253,9 @@ Rolls multiple saving throws.
 * `success_thresholds` (list): A list of success thresholds (default: None).
 * `animate` (bool): Whether to animate the rolls (default: True).
   
-Returns a list of dictionaries containing the saving throw results.
 
+Returns a list of dictionaries containing the saving throw results.
+______
 
 
 
@@ -264,6 +283,6 @@ Returns a list of dictionaries containing the saving throw results.
 `TUMBLE`: Represents the tumble animation style.
 `SPIN`: Represents the spin animation style.
 
-
+______
 
 This documentation provides an overview of the methods and enums available in the dicerollAPI class. It allows you to roll dice, perform animations, manage roll history, and customize the animation settings.
