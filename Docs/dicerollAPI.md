@@ -7,308 +7,161 @@
 
 The `dicerollAPI` class provides a high-level interface for rolling dice, performing animations, and managing roll history. 
 
-It utilizes the `DiceRoller` and `DiceAnimator` classes internally.
+Here's a summary of the functions exposed by the API:
+_____
 
+#### `__init__(self, save_rolls=False, log_console=None)`
+Initializes the dicerollAPI instance with optional parameters to enable saving rolls and logging to the console.
+* `save_rolls` (bool): Optional parameter to enable saving rolls. Default is False.
+* `log_console` (bool): Optional parameter to enable logging to the console. Default is None.
 
+_____
 
-### Initialization:
+#### `set_animation_window_size(self, width=300, height=300)`
+Initializes the dicerollAPI instance with optional parameters to enable saving rolls and logging to the console.
+* `width` (int): Width of the animation window. Default is 300.
+* `height` (int): Height of the animation window. Default is 300.
 
-(Optional) When creating an instance of the `dicerollAPI`, you can specify the `save_rolls` parameter to enable or disable saving roll history.
+_____
 
-```python
-api = dicerollAPI(save_rolls=False)
-```
+#### `set_dice_image_path(self, path="dice_imgs")`
+Initializes the dicerollAPI instance with optional parameters to enable saving rolls and logging to the console.
+* `save_rolls` (bool): Optional parameter to enable saving rolls. Default is False.
+* `log_console` (bool): Optional parameter to enable logging to the console. Default is None.
 
-______
-(Optional) When you create an instance of the DiceRoller class, you can specify the `save_format` parameter to choose between saving the last 5 rolls as a text file or a JSON file. For example:
+_____
 
-```python
-# Save last 5 rolls as a text file (default)
-dice_roller = DiceRoller(save_rolls=True)
+#### `roll_dice(self, dice_notation, dice_color=DiceColor.WHITE, target_value=None, animate=True)`
+* `dice_notation` (str): The dice notation specifying the number and type of dice to roll (e.g., "2d6").
+* `dice_color` (DiceColor): The color of the dice. Default is DiceColor.WHITE.
+* `target_value` (int): Optional target value for the roll. Default is None.
+* `animate` (bool): Flag to enable or disable animation. Default is True.
+_____
 
-# Save last 5 rolls as a JSON file
-dice_roller = DiceRoller(save_rolls=True, save_format="json")
-```
+#### `roll_single_dice(self, dice_type, dice_color=DiceColor.WHITE, animate=True)`
+* dice_type (str): The type of dice to roll (e.g., "d6", "d20").
+* dice_color (DiceColor): The color of the dice. Default is DiceColor.WHITE.
+* animate (bool): Flag to enable or disable animation. Default is True.
 
-If no `save_format` parameter is defined, the default will be text file (.txt)
+_____
 
-______
-
-# Methods
-
-### set_animation_window_size(width=300, height=300)
-Sets the size of the animation window.
-
-* `width` (int): The width of the window (default: 300).
-* `height` (int): The height of the window (default: 300).
-______
-### set_dice_image_path(path="diceroll/images")
-Sets the path to the directory containing the dice images.
-
-* `path` (str): The path to the dice image directory (default: "diceroll/images")
-______
-### roll_dice(dice_notation, dice_color=DiceColor.BLUE, target_value=None, animate=True)
-Rolls the specified dice and returns the roll result.
-
-* `dice_notation` (str): The dice notation (e.g., "2d6+4").
-* `dice_color` (str): The color of the dice (default: DiceColor.BLUE).
-* `target_value` (int): The target value for the roll (default: None).
-* `animate` (bool): Whether to animate the roll (default: True).
-
-  
-Returns a dictionary containing the roll result, or `None` if the dice notation is invalid.
-______
-### roll_single_dice(dice_type, dice_color=DiceColor.BLUE, animate=True)
-Rolls a single dice of the specified type.
-
-* `dice_type` (str): The type of the dice (e.g., DiceType.D20).
-* `dice_color` (str): The color of the dice (default: DiceColor.BLUE).
-* `animate` (bool): Whether to animate the roll (default: True).
-
-  
-Returns a dictionary containing the roll result.
-______
-### roll_multiple_dice_of_same_type(dice_type, num_dice, dice_color=DiceColor.BLUE, animate=True)
-Rolls multiple dice of the same type.
-
-* `dice_type` (str): The type of the dice (e.g., DiceType.D20).
+#### `roll_multiple_dice_of_same_type(self, dice_type, num_dice, dice_color=DiceColor.WHITE, animate=True)`
+* `dice_type` (str): The type of dice to roll (e.g., "d6", "d20").
 * `num_dice` (int): The number of dice to roll.
-* `dice_color` (str): The color of the dice (default: DiceColor.BLUE).
-* `animate` (bool): Whether to animate the roll (default: True).
+* `dice_color` (DiceColor): The color of the dice. Default is DiceColor.WHITE.
+* `animate` (bool): Flag to enable or disable animation. Default is True.
 
-  
-Returns a dictionary containing the roll result.
-______
+_____
 
+#### `roll_multiple_dice(self, dice_notations, dice_colors=None, target_values=None, animate=True)`
+* dice_notations (list): A list of dice notations specifying the number and type of dice to roll for each set.
+* dice_colors (list): Optional list of dice colors corresponding to each set of dice. Default is None.
+* target_values (list): Optional list of target values for each set of dice. Default is None.
+* animate (bool): Flag to enable or disable animation. Default is True.
 
-### roll_multiple_dice(dice_notations, dice_colors=None, target_values=None, animate=True)
-Rolls multiple dice with different notations.
 
-* `dice_notations` (list): A list of dice notations.
-* `dice_colors` (list): A list of dice colors (default: None).
-* `target_values` (list): A list of target values (default: None).
-* `animate` (bool): Whether to animate the rolls (default: True).
+_____
 
-  
-Returns a list of dictionaries containing the roll results.
-______
+#### `get_roll_sum(self, roll_result)`
+* `roll_result` (dict): The result of a dice roll.
 
 
+_____
 
-### get_roll_sum(roll_result)
-Calculates the sum of the roll details.
+#### `get_roll_average(self, roll_result)`
+* `roll_result` (dict): The result of a dice roll.
 
-* `roll_result` (dict): The roll result dictionary.
+_____
 
-  
-Returns the sum of the roll details.
-______
+#### `get_roll_max(self, roll_result)`
+* `roll_result` (dict): The result of a dice roll.
 
 
+_____
 
-### get_roll_average(roll_result)
-Calculates the average of the roll details.
+#### `get_roll_min(self, roll_result)`
+* `roll_result` (dict): The result of a dice roll.
 
-* `roll_result` (dict): The roll result dictionary.
 
-  
-Returns the average of the roll details.
-______
+_____
 
+#### `get_roll_statistics(self, dice_notation, num_rolls)`
+* `dice_notation` (str): The dice notation specifying the number and type of dice to roll.
+* `num_rolls` (int): The number of rolls to perform for calculating statistics.
 
 
-### get_roll_max(roll_result)
-Returns the maximum value from the roll details.
+_____
 
-* `roll_result` (dict): The roll result dictionary.
+#### `save_roll_history_to_file(self, file_path)`
+* `file_path` (str): The path to the file where the roll history will be saved.
 
-  
-Returns the maximum value from the roll details.
-______
 
+_____
 
+#### `load_roll_history_from_file(self, file_path)`
+* `file_path` (str): The path to the file from which the roll history will be loaded.v
 
 
-### get_roll_min(roll_result)
-Returns the minimum value from the roll details.
+_____
 
-* `roll_result` (dict): The roll result dictionary.
+#### `get_last_roll_total(self)`
+* No arguments.
 
-  
-Returns the minimum value from the roll details.
-______
 
+_____
 
+#### `get_last_roll_details(self)`
+* No arguments.
 
 
-### get_roll_statistics(dice_notation, num_rolls)
-Retrieves the statistics for a given dice notation and number of rolls.
+_____
 
-* `dice_notation` (str): The dice notation.
-* `num_rolls` (int): The number of rolls to perform.
+#### `get_last_5_rolls(self)`
+* No arguments.
 
-  
-Returns a dictionary containing the roll statistics.
-______
 
+_____
 
+#### `get_available_dice_colors(self)`
+* No arguments.
 
+_____
 
-### save_roll_history_to_file(file_path)
-Saves the roll history to a file.
+#### `enable_roll_saving(self)`
+* No arguments.
 
-* `file_path` (str): The path to the file.
 
-______
+_____
 
+#### `disable_roll_saving(self)`
+* No arguments.
 
+_____
 
-### load_roll_history_from_file(file_path)
-Loads the roll history from a file.
+#### `set_animation_style(self, style=AnimationStyle.SHAKE)`
+* `style` (AnimationStyle): The animation style to set. Default is `AnimationStyle.SHAKE`
 
-* `file_path` (str): The path to the file.
 
-  
-Returns the loaded roll history.
-______
+_____
 
+#### `roll_saving_throw(self, dice_type=DiceType.D20, dice_color=DiceColor.WHITE, target_value=None, success_threshold=None, animate=True)`
+* `dice_type` (DiceType): The type of dice to roll for the saving throw. Default is `DiceType.D20`.
+* `dice_color` (DiceColor): The color of the dice. Default is `DiceColor.WHITE`
+* `target_value` (int): Optional target value for the saving throw. Default is `None`
+* `success_threshold` (int): Optional success threshold for the saving throw. Default is `None`
+* `animate` (bool): Flag to enable or disable animation. Default is `True`
 
+_____
 
-
-
-### get_last_roll_total()
-Retrieves the total of the last roll.
-
-
-Returns the total of the last roll.
-______
-
-
-
-
-### get_last_roll_details()
-Retrieves the details of the last roll.
-
-
-Returns the details of the last roll.
-______
-
-
-
-
-
-
-### get_last_5_rolls()
-Retrieves the last 5 rolls.
-
-
-Returns a list of the last 5 roll results.
-
-______
-
-
-
-
-
-### get_available_dice_colors()
-Retrieves the available dice colors.
-
-
-Returns a list of available dice colors.
-
-______
-
-
-
-### enable_roll_saving()
-Enables saving roll history.
-
-
-______
-
-
-### disable_roll_saving()
-Disables saving roll history.
-
-
-______
-
-
-### disable_roll_saving()
-Disables saving roll history.
-
-
-______
-
-
-### set_animation_style(style=AnimationStyle.SHAKE)
-Sets the animation style.
-
-* `style` (str): The animation style (default: AnimationStyle.SHAKE).
-
-______
-
-
-
-
-### roll_saving_throw(dice_type=DiceType.D20, dice_color=DiceColor.BLUE, target_value=None, success_threshold=None, animate=True)
-Rolls a saving throw.
-
-* `dice_type` (str): The type of the dice (default: DiceType.D20).
-* `dice_color` (str): The color of the dice (default: DiceColor.BLUE).
-* `target_value` (int): The target value for the roll (default: None).
-* `success_threshold` (int): The success threshold for the roll (default: None).
-* `animate` (bool): Whether to animate the roll (default: True).
-  
-
- Returns a dictionary containing the saving throw result.
-______
-
-
-
-
-
-
-### roll_multiple_saving_throws(num_throws, dice_type=DiceType.D20, dice_color=DiceColor.BLUE, target_values=None, success_thresholds=None, animate=True)
-Rolls multiple saving throws.
-
+#### `roll_multiple_saving_throws(self, num_throws, dice_type=DiceType.D20, dice_color=DiceColor.WHITE, target_values=None, success_thresholds=None, animate=True)`
 * `num_throws` (int): The number of saving throws to roll.
-* `dice_type` (str): The type of the dice (default: DiceType.D20).
-* `dice_color` (str): The color of the dice (default: DiceColor.BLUE).
-* `target_values` (list): A list of target values (default: None).
-* `success_thresholds` (list): A list of success thresholds (default: None).
-* `animate` (bool): Whether to animate the rolls (default: True).
-  
+* `dice_type` (DiceType): The type of dice to roll for each saving throw. Default is `DiceType.D20`
+* `dice_color` (DiceColor): The color of the dice. Default is `DiceColor.WHITE`
+* `target_values` (list): Optional list of target values for each saving throw. Default is `None`
+* `success_thresholds` (list): Optional list of success thresholds for each saving throw. Default is `None`
+* `animate` (bool): Flag to enable or disable animation. Default is `True`
 
-Returns a list of dictionaries containing the saving throw results.
-______
+_____
 
-
-
-
-# Enums
-`dicerollAPI` uses the following enums:
-
-
-### DiceType
-`D4`: Represents a 4-sided dice.
-`D6`: Represents a 6-sided dice.
-`D8`: Represents an 8-sided dice.
-`D10`: Represents a 10-sided dice.
-`D12`: Represents a 12-sided dice.
-`D20`: Represents a 20-sided dice.
-
-### DiceColor
-`RED`: Represents the red dice color.
-`BLUE`: Represents the blue dice color.
-`BLACK`: Represents the black dice color.
-`WHITE`: Represents the white dice color.
-
-### AnimationStyle
-`SHAKE`: Represents the shake animation style.
-`TUMBLE`: Represents the tumble animation style.
-`SPIN`: Represents the spin animation style.
-
-______
-
-This documentation provides an overview of the methods and enums available in the dicerollAPI class. It allows you to roll dice, perform animations, manage roll history, and customize the animation settings.
+#### `animate_dice_roll(self, dice_notation)`
+* `dice_notation` (str): The dice notation specifying the number and type of dice to roll.
