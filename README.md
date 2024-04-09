@@ -38,4 +38,4 @@ ____
 
 ____
 
-This library and API were specifically designed for and alongside the **Adventure!** *Interactive story engine* : https://github.com/ViciousSquid/Adventure
+This API was custom-designed for use in the **Adventure!** *Interactive story engine* : https://github.com/ViciousSquid/Adventure
