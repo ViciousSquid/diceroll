@@ -16,13 +16,12 @@ It includes classes for rolling dice, tracking & saving roll results, and animat
 - Enable or disable roll saving
 - Set/Get the dice colour for dice animation (red, white, blue, black & custom)
 - Perform dice rolls with animated visualizations (optional, requires Pygame)
+____
 
-## How this is used
+## Further Documentation
 
-Core functionality is exposed as an API allowing rolling functionality, retrieve roll results, dice types, and colours
-
-Further Documentation: https://github.com/ViciousSquid/diceroll/tree/main/Docs
-
+https://github.com/ViciousSquid/diceroll/tree/main/Docs
+____
 ### Source files:
 
 
