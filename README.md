@@ -36,6 +36,8 @@ ____
 
 `Example.py` and `Example2.py` : Commented demos of the `roll_dice` function in the console. 
 
+`Example3.py` : A simple demo of an animation that rolls and returns a result (requires pygame)
+
 ____
 
 This API was custom-designed for use in the **Adventure!** *Interactive story engine* : https://github.com/ViciousSquid/Adventure
