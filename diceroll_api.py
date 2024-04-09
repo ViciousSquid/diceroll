@@ -8,10 +8,16 @@ except ImportError:
 from diceroll import DiceRoller
 from datetime import datetime
 import json
-import pygame
 import random
 import time
 import os
+import sys
+
+try:
+    import pygame
+    pygame_available = True
+except ImportError:
+    pygame_available = False
 
 class DiceType:
     D4 = "d4"
@@ -22,12 +28,20 @@ class DiceType:
     D20 = "d20"
 
 class dicerollAPI:
-    def __init__(self, save_rolls=False):
+    def __init__(self, save_rolls=False, log_console=None):
         self.dice_roller = DiceRoller(save_rolls=save_rolls)
         if DiceAnimator is not None:
             self.dice_animator = DiceAnimator()
         else:
             self.dice_animator = None
+        
+        if log_console is None:
+            log_console = os.path.exists("debug.txt")
+        
+        self.log_console = log_console
+        if self.log_console:
+            self.log_file = open("diceroll_log.txt", "a")
+            sys.stdout = self.log_file
 
     def set_animation_window_size(self, width=300, height=300):
         if self.dice_animator is not None:
@@ -40,8 +54,8 @@ class dicerollAPI:
     def roll_dice(self, dice_notation, dice_color=DiceColor.WHITE, target_value=None, animate=True):
         try:
             roll_result = self.dice_roller.roll_dice(dice_notation)
-            if animate and self.dice_animator is not None:
-                self.dice_animator.run_animation(dice_notation, dice_color, target_value)
+            if animate and pygame_available:
+                self.animate_dice_roll(dice_notation)
 
             # Set console text color based on dice_color
             if dice_color == DiceColor.RED:
@@ -168,6 +182,10 @@ class dicerollAPI:
         Returns:
             None
         """
+        if not pygame_available:
+            print("Pygame is not installed. Animation is not available.")
+            return
+
         # Initialize Pygame
         pygame.init()
 
@@ -204,7 +222,7 @@ class dicerollAPI:
             # Clear the window
             window.fill((255, 255, 255))
 
-            # Display the dice roll animation
+            # Display the dice roll animation for a single dice
             for _ in range(10):
                 dice_image = random.choice(dice_images)
                 dice_rect = dice_image.get_rect(center=(window_width // 2, window_height // 2))
@@ -212,11 +230,10 @@ class dicerollAPI:
                 pygame.display.flip()
                 clock.tick(10)
 
-            # Display the final dice images
-            for i, result in enumerate(roll_results):
-                final_dice_image = dice_images[result - 1]
-                final_dice_rect = final_dice_image.get_rect(center=(50 + i * 100, window_height // 2))
-                window.blit(final_dice_image, final_dice_rect)
+            # Display the final dice image
+            final_dice_image = dice_images[roll_results[0] - 1]
+            final_dice_rect = final_dice_image.get_rect(center=(window_width // 2, window_height // 2))
+            window.blit(final_dice_image, final_dice_rect)
 
             # Display the roll result text
             result_text = font.render(f"Roll Result: {roll_sum}", True, (0, 0, 0))
@@ -237,3 +254,14 @@ class dicerollAPI:
         print(f"Dice Notation: {dice_notation}")
         print(f"Roll Results: {roll_results}")
         print(f"Roll Sum: {roll_sum}")
+
+    def enable_console_logging(self):
+        self.log_console = True
+        self.log_file = open("diceroll_log.txt", "a")
+        sys.stdout = self.log_file
+
+    def disable_console_logging(self):
+        self.log_console = False
+        if self.log_file is not None:
+            self.log_file.close()
+            sys.stdout = sys.__stdout__
