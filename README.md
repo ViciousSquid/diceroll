@@ -30,9 +30,9 @@ ____
 
 `diceroll_api.py` : Exposes `dicerollAPI` classes and defs
 
-`roll_dice_example.py` : A script that demonstrates the usage of the `roll_dice` function in the console without animation.
+`diceroll_enums.py` 
 
-`roll_dice_example_gui.py` : A script that demonstrates the usage of the `roll_dice` function with a GUI and animations (requires pygame)
+`Example.py` and `Example2.py` : Demos of the `roll_dice` function in the console.
 
 ____
 
