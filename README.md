@@ -35,6 +35,6 @@ ____
 
 `roll_dice_example_gui.py` : A script that demonstrates the usage of the `roll_dice` function with a GUI and animations (requires pygame)
 
-
+____
 
 This library and API were specifically designed for and alongside the **Adventure!** *Interactive story engine* : https://github.com/ViciousSquid/Adventure
