@@ -1,5 +1,5 @@
 * All functions and classes documented: https://github.com/ViciousSquid/diceroll/tree/main/Docs
-* Please examine `Example1.py`, `Example2.py`, and `Example3_gui.py` for quick feature demos
+* Please refer to `Example1.py`, `Example2.py`, and `Example3_gui.py` for quick feature demos
 
 
 
