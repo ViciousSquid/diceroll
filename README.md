@@ -36,7 +36,7 @@ ____
 
 `Example.py` and `Example2.py` : Commented demos of the `roll_dice` function in the console. 
 
-`Example3_gui.py` : A simple demo of an animation that rolls and returns a result (requires pygame)
+`Example3_gui.py` : A simple demo of an animated roll that returns a result (requires pygame)
 
 ____
 
