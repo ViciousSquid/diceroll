@@ -47,7 +47,7 @@ class dicerollAPI:
         if self.dice_animator is not None:
             self.dice_animator.set_window_size(width, height)
 
-    def set_dice_image_path(self, path="diceroll/images"):
+    def set_dice_image_path(self, path="dice_imgs"):
         if self.dice_animator is not None:
             self.dice_animator.set_dice_image_path(path)
 
