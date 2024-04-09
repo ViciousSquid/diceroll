@@ -35,7 +35,7 @@ Runs the dice roll animation and returns the roll result.
 
 ### Example usage:
 
-```
+```python
 from diceroll import DiceRoller
 from diceroll_anim import DiceAnimator
 
