@@ -1,10 +1,16 @@
+from diceroll_enums import DiceColor, AnimationStyle
+from diceroll_api import dicerollAPI
 from diceroll import DiceRoller
-from diceroll_api import dicerollAPI, DiceColor, AnimationStyle
 import random
-import pygame
 import time
 import os
 from datetime import datetime
+import pygame
+pygame.init()
+print(pygame.get_sdl_version())
+screen = pygame.display.set_mode((800, 600))    #
+pygame.display.set_caption("Dice Animation")    #
+pygame.display.flip()                           #
 
 class DiceAnimator:
     def __init__(self, window_width=300, window_height=300, dice_image_path="diceroll/images"):
@@ -102,10 +108,9 @@ class DiceAnimator:
             pygame.display.flip()
             clock.tick(30)
 
-        dice_api = dicerollAPI()
-        roll_result = dice_api.roll_dice(dice_notation)
+        roll_result = dice_roller.roll_dice(dice_notation)
 
-        roll_details = dice_api.get_last_roll_details()
+        roll_details = dice_roller.get_last_roll_details()
         single_roll_result = roll_details[0]
 
         self.window.fill((255, 255, 255))

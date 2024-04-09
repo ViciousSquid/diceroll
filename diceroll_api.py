@@ -1,4 +1,10 @@
-from diceroll_anim import DiceAnimator
+from diceroll_enums import DiceColor, AnimationStyle
+
+try:
+    from diceroll_anim import DiceAnimator
+except ImportError:
+    DiceAnimator = None
+
 from diceroll import DiceRoller
 from datetime import datetime
 import json
@@ -11,48 +17,61 @@ class DiceType:
     D12 = "d12"
     D20 = "d20"
 
-class DiceColor:
-    RED = 'red'
-    BLUE = 'blue'
-    BLACK = 'black'
-    WHITE = 'white'
-
-class AnimationStyle:
-    SHAKE = 'shake'
-    TUMBLE = 'tumble'
-    SPIN = 'spin'
-
 class dicerollAPI:
     def __init__(self, save_rolls=False):
         self.dice_roller = DiceRoller(save_rolls=save_rolls)
-        self.dice_animator = DiceAnimator()
+        if DiceAnimator is not None:
+            self.dice_animator = DiceAnimator()
+        else:
+            self.dice_animator = None
 
     def set_animation_window_size(self, width=300, height=300):
-        self.dice_animator.set_window_size(width, height)
+        if self.dice_animator is not None:
+            self.dice_animator.set_window_size(width, height)
 
     def set_dice_image_path(self, path="diceroll/images"):
-        self.dice_animator.set_dice_image_path(path)
+        if self.dice_animator is not None:
+            self.dice_animator.set_dice_image_path(path)
 
-    def roll_dice(self, dice_notation, dice_color=DiceColor.BLUE, target_value=None, animate=True):
+    def roll_dice(self, dice_notation, dice_color=DiceColor.WHITE, target_value=None, animate=True):
         try:
             roll_result = self.dice_roller.roll_dice(dice_notation)
-            if animate:
+            if animate and self.dice_animator is not None:
                 self.dice_animator.run_animation(dice_notation, dice_color, target_value)
+
+            # Set console text color based on dice_color
+            if dice_color == DiceColor.RED:
+                console_color = '\033[91m'  # Red
+            elif dice_color == DiceColor.BLUE:
+                console_color = '\033[94m'  # Light blue
+            elif dice_color == DiceColor.GREEN:
+                console_color = '\033[92m'  # Green
+            elif dice_color == DiceColor.BLACK:
+                console_color = '\033[97m'  # White (for visibility)
+            elif dice_color == 'bread':
+                console_color = '\033[97m'  # White (default) for 'bread' color
+            else:
+                console_color = '\033[97m'  # White (default)
+
+            print(f"{console_color}Dice Notation: {dice_notation}")
+            print(f"Roll Result: {roll_result['roll_result']}")
+            print(f"Roll Details: {roll_result['roll_details']}\033[0m")  # Reset color
+
             return roll_result
         except ValueError as e:
-            print(f"Invalid dice notation: {dice_notation}. Error: {str(e)}")
+            print(f"\033[91mInvalid dice notation: {dice_notation}. Error: {str(e)}\033[0m")
             return None
 
-    def roll_single_dice(self, dice_type, dice_color=DiceColor.BLUE, animate=True):
+    def roll_single_dice(self, dice_type, dice_color=DiceColor.WHITE, animate=True):
         return self.roll_dice(dice_type, dice_color=dice_color, animate=animate)
 
-    def roll_multiple_dice_of_same_type(self, dice_type, num_dice, dice_color=DiceColor.BLUE, animate=True):
+    def roll_multiple_dice_of_same_type(self, dice_type, num_dice, dice_color=DiceColor.WHITE, animate=True):
         dice_notation = f"{num_dice}{dice_type}"
         return self.roll_dice(dice_notation, dice_color=dice_color, animate=animate)
 
     def roll_multiple_dice(self, dice_notations, dice_colors=None, target_values=None, animate=True):
         if dice_colors is None:
-            dice_colors = [DiceColor.BLUE] * len(dice_notations)
+            dice_colors = [DiceColor.WHITE] * len(dice_notations)
         if target_values is None:
             target_values = [None] * len(dice_notations)
 
@@ -99,7 +118,7 @@ class dicerollAPI:
         return self.dice_roller.get_last_5_rolls()
 
     def get_available_dice_colors(self):
-        return [color for color in DiceColor.__dict__.values() if not color.startswith("__")]
+        return [color_value for color_name, color_value in DiceColor.__dict__.items() if not color_name.startswith("__")]
 
     def enable_roll_saving(self):
         self.dice_roller.save_rolls = True
@@ -110,7 +129,7 @@ class dicerollAPI:
     def set_animation_style(self, style=AnimationStyle.SHAKE):
         self.dice_animator.set_animation_style(style)
 
-    def roll_saving_throw(self, dice_type=DiceType.D20, dice_color=DiceColor.BLUE, target_value=None, success_threshold=None, animate=True):
+    def roll_saving_throw(self, dice_type=DiceType.D20, dice_color=DiceColor.WHITE, target_value=None, success_threshold=None, animate=True):
         if success_threshold is None:
             success_threshold = target_value
 
@@ -122,7 +141,7 @@ class dicerollAPI:
 
         return roll_result
 
-    def roll_multiple_saving_throws(self, num_throws, dice_type=DiceType.D20, dice_color=DiceColor.BLUE, target_values=None, success_thresholds=None, animate=True):
+    def roll_multiple_saving_throws(self, num_throws, dice_type=DiceType.D20, dice_color=DiceColor.WHITE, target_values=None, success_thresholds=None, animate=True):
         if target_values is None:
             target_values = [None] * num_throws
         if success_thresholds is None:

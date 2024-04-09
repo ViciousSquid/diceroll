@@ -1,14 +1,16 @@
+import json
 import random
 import re
 from collections import defaultdict
-print|("++ diceroll init")
+
 class DiceRoller:
-    def __init__(self, save_rolls=False):
+    def __init__(self, save_rolls=False, save_format="txt"):
         self.last_roll_total = None
         self.last_roll_details = None
         self.last_5_rolls = []
         self.save_rolls = save_rolls
         self.roll_history = []
+        self.save_format = save_format
 
     def roll_dice(self, dice_notation, target=None, success_outcome=None, failure_outcome=None):
         roll_results = []
@@ -70,6 +72,12 @@ class DiceRoller:
         self.roll_history = roll_history
 
     def save_last_5_rolls(self):
+        if self.save_format == "json":
+            self.save_last_5_rolls_json()
+        else:
+            self.save_last_5_rolls_txt()
+
+    def save_last_5_rolls_txt(self):
         with open("last_5_rolls.txt", "w") as file:
             for i, roll_data in enumerate(self.last_5_rolls, 1):
                 file.write(f"Result {i}:\n")
@@ -77,6 +85,10 @@ class DiceRoller:
                 file.write(f"  Roll Result: {roll_data['roll_result']}\n")
                 file.write(f"  Roll Details: {roll_data['roll_details']}\n")
                 file.write("\n")
+
+    def save_last_5_rolls_json(self):
+        with open("last_5_rolls.json", "w") as file:
+            json.dump(self.last_5_rolls, file, indent=2)
 
     def get_roll_statistics(self, dice_notation, num_rolls):
         roll_results = []
