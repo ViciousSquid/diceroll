@@ -22,7 +22,7 @@ Raises <code style="color : name_color">ImportError</code> if <code style="color
 
 ### Example usage:
 
-```
+```python
 from diceroll import roll_dice
 
 # Roll 2d6 dice with a target of 7, success outcome, and failure outcome
