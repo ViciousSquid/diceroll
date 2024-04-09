@@ -1,3 +1,5 @@
+Here's the article on ANSI codes: https://github.com/ViciousSquid/diceroll/blob/main/Docs/ANSI%20escape%20codes.md
+
 In this example, we use ANSI escape codes to set the console text color before printing the result of each die:
 
 ```python
