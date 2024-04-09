@@ -1,3 +1,4 @@
+```python
 event_table = {
     2: "A mysterious stranger approaches.",
     3: "You find a hidden treasure!",
@@ -10,3 +11,4 @@ event_table = {
 event_roll = dice_api.roll_single_dice("1d6")
 event = event_table[event_roll["roll_result"]]
 print(event)
+```
