@@ -34,7 +34,7 @@ ____
 
 `diceroll_enums.py` 
 
-`Example.py` and `Example2.py` : Demos of the `roll_dice` function in the console.
+`Example.py` and `Example2.py` : Commented demos of the `roll_dice` function in the console. 
 
 ____
 
