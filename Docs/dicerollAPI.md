@@ -163,5 +163,14 @@ _____
 
 _____
 
+
+#### `enable_console_logging(self)`
+* No arguments.
+
+  _____
+
+
+#### `disable_console_logging(self)`
+* No arguments.
 #### `animate_dice_roll(self, dice_notation)`
 * `dice_notation` (str): The dice notation specifying the number and type of dice to roll.
