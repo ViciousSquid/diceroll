@@ -34,8 +34,5 @@ Dice 2: 2
 Total: 6
 ```
 
-2d6 Roll Result (Blue and Green):
-Dice 1: <code style="Cyan : name_color">4</code>
-Dice 2: <code style="Greenyellow : name_color">4</code>
-Total: 6
+In this output, the first die's result is shown in blue color, the second die's result is shown in green color, the total sum is printed in the default console color.
 
