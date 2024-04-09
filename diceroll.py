@@ -1,3 +1,4 @@
+print ("/n+++dicerollAPI")
 import json
 import random
 import re
