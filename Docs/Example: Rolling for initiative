@@ -1,4 +1,4 @@
-```python
+
 from diceroll_api import dicerollAPI
 
 dice_api = dicerollAPI()
@@ -12,4 +12,4 @@ elif player2_initiative > player1_initiative:
     print("Player 2 goes first!")
 else:
     print("Tie! Roll again.")
-```
+
