@@ -6,7 +6,7 @@
 
 API documentation starts here: https://github.com/ViciousSquid/diceroll/blob/main/Docs/dicerollAPI.md
 
-It includes classes for rolling dice, tracking & saving roll results, and animating dice rolls using Pygame.
+It includes classes for rolling dice, tracking & saving roll results, and animating dice rolls using Pygame (pygame is completely optional)
 
 ## Features
 
