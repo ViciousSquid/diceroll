@@ -19,6 +19,19 @@ try:
 except ImportError:
     pygame_available = False
 
+class Logger(object):
+    def __init__(self, log_file):
+        self.terminal = sys.stdout
+        self.log = open(log_file, 'a')
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
+
 class DiceType:
     D4 = "d4"
     D6 = "d6"
@@ -34,16 +47,23 @@ class dicerollAPI:
             self.dice_animator = DiceAnimator()
         else:
             self.dice_animator = None
-        
+
         if log_console is None:
             log_console = os.path.exists("debug.txt")
-        
+
         self.log_console = log_console
         if self.log_console:
-            self.log_file = open("diceroll_log.txt", "a")
-            sys.stdout = self.log_file
+            logs_dir = 'logs'
+            if not os.path.exists(logs_dir):
+                os.makedirs(logs_dir)
 
-    def set_animation_window_size(self, width=300, height=300):
+            current_datetime = datetime.now().strftime("%d%m_%H%M")
+            log_file = os.path.join(logs_dir, f'diceroll_log_{current_datetime}.txt')
+
+            sys.stdout = Logger(log_file)
+            sys.stderr = Logger(log_file)
+
+    def set_animation_window_size(self, width=200, height=200):
         if self.dice_animator is not None:
             self.dice_animator.set_window_size(width, height)
 
@@ -56,6 +76,8 @@ class dicerollAPI:
             roll_result = self.dice_roller.roll_dice(dice_notation)
             if animate and pygame_available:
                 self.animate_dice_roll(dice_notation)
+            elif animate and not pygame_available:
+                print("Pygame is not available. Skipping animation.")
 
             # Set console text color based on dice_color
             if dice_color == DiceColor.RED:
@@ -190,8 +212,8 @@ class dicerollAPI:
         pygame.init()
 
         # Set the window size
-        window_width = 400
-        window_height = 400
+        window_width = 200
+        window_height = 280
         window = pygame.display.set_mode((window_width, window_height))
         pygame.display.set_caption("Dice Roll Animation")
 
@@ -257,11 +279,17 @@ class dicerollAPI:
 
     def enable_console_logging(self):
         self.log_console = True
-        self.log_file = open("diceroll_log.txt", "a")
-        sys.stdout = self.log_file
+        logs_dir = 'logs'
+        if not os.path.exists(logs_dir):
+            os.makedirs(logs_dir)
+
+        current_datetime = datetime.now().strftime("%d%m_%H%M")
+        log_file = os.path.join(logs_dir, f'diceroll_log_{current_datetime}.txt')
+
+        sys.stdout = Logger(log_file)
+        sys.stderr = Logger(log_file)
 
     def disable_console_logging(self):
         self.log_console = False
-        if self.log_file is not None:
-            self.log_file.close()
-            sys.stdout = sys.__stdout__
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
