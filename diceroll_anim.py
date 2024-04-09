@@ -8,7 +8,7 @@ from datetime import datetime
 import pygame
 
 class DiceAnimator:
-    def __init__(self, window_width=300, window_height=300, dice_image_path="diceroll/images"):
+    def __init__(self, window_width=300, window_height=300, dice_image_path="dice_imgs"):
         self.window_width = window_width
         self.window_height = window_height
         self.window = None
