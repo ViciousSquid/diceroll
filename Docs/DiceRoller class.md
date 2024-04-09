@@ -16,7 +16,7 @@ Raises <code style="color : name_color">ValueError</code> if an invalid dice typ
 
 ### Example usage:
 
-```
+```python
 from diceroll import DiceRoller
 
 # Create a DiceRoller instance
