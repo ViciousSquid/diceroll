@@ -3,7 +3,7 @@ import json
 import random
 import re
 from collections import defaultdict
-
+print (" ")
 class DiceRoller:
     def __init__(self, save_rolls=False, save_format="txt"):
         self.last_roll_total = None
