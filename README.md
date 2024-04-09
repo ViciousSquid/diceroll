@@ -28,7 +28,7 @@ ____
 
 `diceroll.py` : Contains the `DiceRoller` and `OutcomeDeterminer` classes, as well as the `roll_dice` function.
 
-`diceroll_anim.py` : (optional) Contains the `DiceAnimator` class, which handles the dice roll animation using the Pygame library.
+`diceroll_anim.py` : **(optional)** Contains the `DiceAnimator` class, which handles animation using the Pygame.
 
 `diceroll_api.py` : Exposes `dicerollAPI` classes and defs
 
