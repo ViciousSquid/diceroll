@@ -1,6 +1,8 @@
 from diceroll_api import dicerollAPI
 from diceroll_enums import DiceColor
 
+print("\n++ diceroll demo")
+
 # Create a dicerollAPI instance
 dice_api = dicerollAPI()
 
@@ -65,15 +67,23 @@ for i, roll_data in enumerate(last_5_rolls, 1):
     print(f"  Roll Result: {roll_data['roll_result']}")
     print(f"  Roll Details: {roll_data['roll_details']}")
 
+
+
 # Disable roll saving
 # This will stop saving the roll results to the file
 dice_api.disable_roll_saving()
 
+
 # Roll 1d6 dice
+print("\n++ Rolling 1d6...")
 # This roll result will not be saved to the file
 result = dice_api.roll_dice("1d6")
 print("\n1d6 Roll Result (Not Saved):")
 print(result)
+
+
+
+
 
 # Get the available dice colors
 # This will retrieve the list of available dice colors for the dice animation
