@@ -12,7 +12,7 @@ It includes classes for rolling dice, tracking & saving roll results, and animat
 
 - Roll various types of dice (e.g., 2d6, 1d20, 3d8+1d4) and get the roll results
 - Save the last 5 roll results to a file (.txt or .json)
-- Throwing saves and skillchecks
+- Throwing saves, targets and skillchecks
 - Retrieve the last 5 roll results
 - Set/Get the dice colour for dice animation (red, white, blue, black & custom)
 - Perform dice rolls with animated visualizations (optional, requires Pygame)
