@@ -35,10 +35,3 @@ last_roll_details = roller.get_last_roll_details()
 print(last_roll_details)  # Output: [3, 4]
 ```
 
-__init__(): Initializes a new instance of the DiceRoller class with the last_roll_total and last_roll_details set to None.
-roll_dice(dice_type): Rolls one or more dice of the specified type and returns the sum of the results. Updates the last_roll_total and last_roll_details attributes.
-dice_type: A string representing the type of dice to roll (e.g., "2d6" or "3d8+1d4" for a combination of dice).
-Returns: An integer representing the sum of the dice roll results.
-Raises ValueError if an invalid dice type is provided.
-get_last_roll_total(): Returns the total of the last dice roll, or None if no roll has been performed yet.
-get_last_roll_details(): Returns the individual results of the last dice roll as a list, or None if no roll has been performed yet.
