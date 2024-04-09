@@ -4,7 +4,7 @@ You can create your own custom outcome determination rules by subclassing the <c
 
 Here's an example:
 
-```
+```python
 from diceroll import OutcomeDeterminer
 
 class CustomOutcomeDeterminer(OutcomeDeterminer):
