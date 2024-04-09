@@ -1,5 +1,5 @@
 * All functions and classes documented: https://github.com/ViciousSquid/diceroll/tree/main/Docs
-* The `Example1.py` and `Example2.py` files have been included in the repository for your perusal
+* The `Example1.py`, `Example2.py`, and `Example3_gui.py` files have been included in the repository for your perusal
 
 
 
