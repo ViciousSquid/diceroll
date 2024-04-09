@@ -13,7 +13,7 @@ pygame.display.set_caption("Dice Animation")    #
 pygame.display.flip()                           #
 
 class DiceAnimator:
-    def __init__(self, window_width=300, window_height=300, dice_image_path="diceroll/images"):
+    def __init__(self, window_width=300, window_height=300, dice_image_path="dice_imgs"):
         pygame.init()
         self.window_width = window_width
         self.window_height = window_height
