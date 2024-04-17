@@ -8,4 +8,4 @@ API documentation starts here: https://github.com/ViciousSquid/diceroll/blob/mai
 
 ## HTML Branch
 
-- Replaces pygame render target with HTML
+- Render target changed from pygame window to a HTML canvas
