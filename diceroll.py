@@ -2,6 +2,7 @@ import random
 import logging
 import re
 from collections import defaultdict
+print("+ diceroll engine 105")
 
 class DiceRoller:
     def __init__(self, save_rolls=False, save_format="txt"):

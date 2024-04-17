@@ -1,23 +1,15 @@
-from diceroll_enums import DiceColor, AnimationStyle
+from .diceroll_enums import DiceColor, AnimationStyle
 
 try:
-    from diceroll_anim import DiceAnimator
+    from .diceroll_anim import DiceAnimator
 except ImportError:
     DiceAnimator = None
 
-from diceroll import DiceRoller
+from .diceroll import DiceRoller
 from datetime import datetime
 import json
-import random
-import time
 import os
 import sys
-
-try:
-    import pygame
-    pygame_available = True
-except ImportError:
-    pygame_available = False
 
 class Logger(object):
     def __init__(self, log_file):
@@ -63,21 +55,13 @@ class dicerollAPI:
             sys.stdout = Logger(log_file)
             sys.stderr = Logger(log_file)
 
-    def set_animation_window_size(self, width=200, height=200):
-        if self.dice_animator is not None:
-            self.dice_animator.set_window_size(width, height)
-
     def set_dice_image_path(self, path="dice_imgs"):
         if self.dice_animator is not None:
-            self.dice_animator.set_dice_image_path(path)
+            self.dice_animator.dice_image_path = path
 
-    def roll_dice(self, dice_notation, dice_color=DiceColor.WHITE, target_value=None, animate=True):
+    def roll_dice(self, dice_notation, dice_color=DiceColor.WHITE, target_value=None):
         try:
             roll_result = self.dice_roller.roll_dice(dice_notation)
-            if animate and pygame_available:
-                self.animate_dice_roll(dice_notation)
-            elif animate and not pygame_available:
-                print("Pygame is not available. Skipping animation.")
 
             # Set console text color based on dice_color
             if dice_color == DiceColor.RED:
@@ -102,14 +86,14 @@ class dicerollAPI:
             print(f"\033[91mInvalid dice notation: {dice_notation}. Error: {str(e)}\033[0m")
             return None
 
-    def roll_single_dice(self, dice_type, dice_color=DiceColor.WHITE, animate=True):
-        return self.roll_dice(dice_type, dice_color=dice_color, animate=animate)
+    def roll_single_dice(self, dice_type, dice_color=DiceColor.WHITE):
+        return self.roll_dice(dice_type, dice_color=dice_color)
 
-    def roll_multiple_dice_of_same_type(self, dice_type, num_dice, dice_color=DiceColor.WHITE, animate=True):
+    def roll_multiple_dice_of_same_type(self, dice_type, num_dice, dice_color=DiceColor.WHITE):
         dice_notation = f"{num_dice}{dice_type}"
-        return self.roll_dice(dice_notation, dice_color=dice_color, animate=animate)
+        return self.roll_dice(dice_notation, dice_color=dice_color)
 
-    def roll_multiple_dice(self, dice_notations, dice_colors=None, target_values=None, animate=True):
+    def roll_multiple_dice(self, dice_notations, dice_colors=None, target_values=None):
         if dice_colors is None:
             dice_colors = [DiceColor.WHITE] * len(dice_notations)
         if target_values is None:
@@ -117,7 +101,7 @@ class dicerollAPI:
 
         roll_results = []
         for i, dice_notation in enumerate(dice_notations):
-            roll_result = self.roll_dice(dice_notation, dice_color=dice_colors[i], target_value=target_values[i], animate=animate)
+            roll_result = self.roll_dice(dice_notation, dice_color=dice_colors[i], target_value=target_values[i])
             roll_results.append(roll_result)
         return roll_results
 
@@ -167,13 +151,13 @@ class dicerollAPI:
         self.dice_roller.save_rolls = False
 
     def set_animation_style(self, style=AnimationStyle.SHAKE):
-        self.dice_animator.set_animation_style(style)
+        self.dice_animator.animation_style = style
 
-    def roll_saving_throw(self, dice_type=DiceType.D20, dice_color=DiceColor.WHITE, target_value=None, success_threshold=None, animate=True):
+    def roll_saving_throw(self, dice_type=DiceType.D20, dice_color=DiceColor.WHITE, target_value=None, success_threshold=None):
         if success_threshold is None:
             success_threshold = target_value
 
-        roll_result = self.roll_dice(dice_type, dice_color=dice_color, target_value=target_value, animate=animate)
+        roll_result = self.roll_dice(dice_type, dice_color=dice_color, target_value=target_value)
 
         if roll_result is not None:
             success = roll_result['roll_result'] >= success_threshold
@@ -181,7 +165,7 @@ class dicerollAPI:
 
         return roll_result
 
-    def roll_multiple_saving_throws(self, num_throws, dice_type=DiceType.D20, dice_color=DiceColor.WHITE, target_values=None, success_thresholds=None, animate=True):
+    def roll_multiple_saving_throws(self, num_throws, dice_type=DiceType.D20, dice_color=DiceColor.WHITE, target_values=None, success_thresholds=None):
         if target_values is None:
             target_values = [None] * num_throws
         if success_thresholds is None:
@@ -189,93 +173,10 @@ class dicerollAPI:
 
         saving_throw_results = []
         for i in range(num_throws):
-            saving_throw_result = self.roll_saving_throw(dice_type, dice_color=dice_color, target_value=target_values[i], success_threshold=success_thresholds[i], animate=animate)
+            saving_throw_result = self.roll_saving_throw(dice_type, dice_color=dice_color, target_value=target_values[i], success_threshold=success_thresholds[i])
             saving_throw_results.append(saving_throw_result)
 
         return saving_throw_results
-
-    def animate_dice_roll(self, dice_notation):
-        """
-        Animates a dice roll based on the provided dice notation and displays the roll details in the console.
-
-        Args:
-            dice_notation (str): The dice notation string (e.g., "2d6", "3d6", "1d6").
-
-        Returns:
-            None
-        """
-        if not pygame_available:
-            print("Pygame is not installed. Animation is not available.")
-            return
-
-        # Initialize Pygame
-        pygame.init()
-
-        # Set the window size
-        window_width = 200
-        window_height = 280
-        window = pygame.display.set_mode((window_width, window_height))
-        pygame.display.set_caption("Dice Roll Animation")
-
-        # Load dice images
-        dice_images = []
-        for i in range(1, 7):
-            image_path = os.path.join("dice_imgs", "blue", f"dice{i}.jpg")
-            dice_images.append(pygame.image.load(image_path))
-
-        # Set up the clock
-        clock = pygame.time.Clock()
-
-        # Set up the font for displaying the result
-        font = pygame.font.Font(None, 36)
-
-        # Perform the dice roll
-        num_dice = int(dice_notation.split("d")[0])
-        roll_results = [random.randint(1, 6) for _ in range(num_dice)]
-        roll_sum = sum(roll_results)
-
-        # Animation loop
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-
-            # Clear the window
-            window.fill((255, 255, 255))
-
-            # Display the dice roll animation for a single dice
-            for _ in range(10):
-                dice_image = random.choice(dice_images)
-                dice_rect = dice_image.get_rect(center=(window_width // 2, window_height // 2))
-                window.blit(dice_image, dice_rect)
-                pygame.display.flip()
-                clock.tick(10)
-
-            # Display the final dice image
-            final_dice_image = dice_images[roll_results[0] - 1]
-            final_dice_rect = final_dice_image.get_rect(center=(window_width // 2, window_height // 2))
-            window.blit(final_dice_image, final_dice_rect)
-
-            # Display the roll result text
-            result_text = font.render(f"Roll Result: {roll_sum}", True, (0, 0, 0))
-            result_rect = result_text.get_rect(center=(window_width // 2, window_height - 50))
-            window.blit(result_text, result_rect)
-
-            # Update the display
-            pygame.display.flip()
-
-            # Wait for 2 seconds before closing the window
-            time.sleep(2)
-            running = False
-
-        # Quit Pygame
-        pygame.quit()
-
-        # Print the roll details in the console
-        print(f"Dice Notation: {dice_notation}")
-        print(f"Roll Results: {roll_results}")
-        print(f"Roll Sum: {roll_sum}")
 
     def enable_console_logging(self):
         self.log_console = True
