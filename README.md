@@ -41,3 +41,5 @@ ____
 ____
 
 This API was custom-designed for use in the **Adventure!** *Interactive story engine* : https://github.com/ViciousSquid/Adventure
+
+How to integrate the API into your own projects is demonstrated by the above game engine
