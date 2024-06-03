@@ -10,6 +10,9 @@ dice_type: A string representing the type of dice to roll (e.g., "2d6" or "3d8+1
 Returns an integer representing the sum of the dice roll results.
 Raises <code style="color : name_color">ValueError</code> if an invalid dice type is provided.
 
+###NOTE
+to roll a single d6, specify dicetype `1d6` - specifying `d6` (without the 1) will raise the ValueError
+
 <code style="color : name_color">**get_last_roll_total()**</code> function:  Returns the total of the last dice roll, or <code style="color : name_color">None</code> if no roll has been performed yet.
 
 <code style="color : name_color">**get_last_roll_details()**</code> Returns the individual results of the last dice roll as a list, or <code style="color : name_color">None</code> if no roll has been performed yet.
