@@ -26,17 +26,9 @@ ____
 ### Source files:
 
 
-`diceroll.py` : Contains the `DiceRoller` and `OutcomeDeterminer` classes, as well as the `roll_dice` function.
-
-`diceroll_anim.py` : **(optional)** Contains the `DiceAnimator` class, which handles animation using the Pygame.
-
-`diceroll_api.py` : Exposes `dicerollAPI` classes and defs
-
-`diceroll_enums.py` 
-
-`Example.py` and `Example2.py` : Commented demos of the `roll_dice` function in the console. 
-
-`Example3_gui.py` : A simple demo of an animated roll that returns a result (requires pygame)
+Run the example files:
+`roll_dice_example.py` (console based)  and 
+`roll_dice_example_GUI.py` (GUI based, uses Pygame)
 
 ____
 
