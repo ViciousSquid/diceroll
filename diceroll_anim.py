@@ -1,351 +1,370 @@
-import ctypes
-import pygame
-import pygame.display
-import base64
-from diceroll_enums import DiceColor, AnimationStyle
-import math
-
-try:
-    from diceroll_anim import DiceAnimator
-except ImportError:
-    DiceAnimator = None
-
-from diceroll import DiceRoller
-from datetime import datetime
-import json
 import random
+import pygame
 import time
 import os
-import sys
-from io import BytesIO
+import re
+from datetime import datetime
+from diceroll import DiceRoller
 
-try:
-    import pygame
-    pygame_available = True
-except ImportError:
-    pygame_available = False
+# Define DiceColor and AnimationStyle locally or import if preferred
+class DiceColor:
+    RED = 'red'
+    BLUE = 'blue'
+    BLACK = 'black'
+    WHITE = 'white'
 
-class Logger(object):
-    def __init__(self, log_file):
-        self.terminal = sys.stdout
-        self.log = open(log_file, 'a')
+class AnimationStyle:
+    SHAKE = 'shake'
+    TUMBLE = 'tumble'
+    SPIN = 'spin'
 
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
+# --- Enhanced Die Class for State ---
+class DieSprite:
+    def __init__(self, x, y, die_size, d6_set, base_images, font):
+        self.x = x
+        self.y = y
+        self.rot = 0
+        self.offset_x = 0
+        self.offset_y = 0
+        self.die_size = die_size
+        self.d6_set = d6_set # Specific color d6 images (list of 6)
+        self.base_images = base_images # Dict of base images {size: img}
+        self.font = font # Font for drawing numbers
+        self.final_value = 0
+        self.is_d6 = (self.die_size == 6 and self.d6_set)
 
-    def flush(self):
-        self.terminal.flush()
-        self.log.flush()
-
-class DiceType:
-    D4 = "d4"
-    D6 = "d6"
-    D8 = "d8"
-    D10 = "d10"
-    D12 = "d12"
-    D20 = "d20"
-
-class dicerollAPI:
-    def __init__(self, save_rolls=False, log_console=None):
-        self.dice_roller = DiceRoller(save_rolls=save_rolls)
-        if DiceAnimator is not None:
-            self.dice_animator = DiceAnimator()
+        if self.is_d6:
+            self.images = self.d6_set
+            self.base_image = None
+        elif self.die_size in self.base_images:
+            self.images = [self.base_images[self.die_size]] # List with one image
+            self.base_image = self.base_images[self.die_size]
         else:
-            self.dice_animator = None
+            self.images = None # Cannot display this die visually
+            self.base_image = None
 
-        if log_console is None:
-            log_console = os.path.exists("debug.txt")
+        self.current_image = random.choice(self.images) if self.images else None
 
-        self.log_console = log_console
-        if self.log_console:
-            logs_dir = 'logs'
-            if not os.path.exists(logs_dir):
-                os.makedirs(logs_dir)
+    def update_animation(self, style, duration_ratio):
+        """Updates position/rotation for one animation frame."""
+        if not self.images: return
 
-            current_datetime = datetime.now().strftime("%d%m_%H%M")
-            log_file = os.path.join(logs_dir, f'diceroll_log_{current_datetime}.txt')
+        # Flicker during animation (use base image for non-d6)
+        self.current_image = random.choice(self.d6_set) if self.is_d6 else self.base_image
 
-            sys.stdout = Logger(log_file)
-            sys.stderr = Logger(log_file)
+        if style == AnimationStyle.SHAKE:
+            self.rot = random.randint(-15, 15)
+            self.offset_x = random.randint(-10, 10)
+            self.offset_y = random.randint(-10, 10)
+        elif style == AnimationStyle.TUMBLE:
+            self.rot = duration_ratio * 360 * random.uniform(0.8, 1.2)
+            self.offset_x = 0
+            self.offset_y = 0
+        elif style == AnimationStyle.SPIN:
+            self.rot = duration_ratio * 720 * random.uniform(0.8, 1.2)
+            self.offset_x = 0
+            self.offset_y = 0
 
-    def set_animation_window_size(self, width=200, height=200):
-        if self.dice_animator is not None:
-            self.dice_animator.set_window_size(width, height)
+    def draw_animated(self, window):
+        """Draws the die during animation."""
+        if not self.current_image: return
 
-    def set_dice_image_path(self, path="dice_imgs"):
-        if self.dice_animator is not None:
-            self.dice_animator.set_dice_image_path(path)
+        rotated_image = pygame.transform.rotate(self.current_image, self.rot)
+        rect = rotated_image.get_rect(center=(self.x + self.offset_x, self.y + self.offset_y))
+        window.blit(rotated_image, rect)
 
-    def roll_dice(self, dice_notation, dice_color=DiceColor.WHITE, target_value=None, animate=True):
+    def set_final_value(self, value):
+        """Sets the final value and image."""
+        self.final_value = value
+        if self.is_d6 and 1 <= value <= 6:
+            self.current_image = self.images[value - 1]
+        elif self.base_image:
+            self.current_image = self.base_image
+        else:
+            self.current_image = None # Should not happen if check is done before
+
+    def draw_final(self, window, pos_x, pos_y):
+        """Draws the die in its final state at a specific position."""
+        if not self.current_image: return
+
+        rect = self.current_image.get_rect(center=(pos_x, pos_y))
+        window.blit(self.current_image, rect)
+
+        # If not a d6, draw the number on top
+        if not self.is_d6:
+            text_surface = self.font.render(str(self.final_value), True, (255, 255, 255)) # White text
+            text_rect = text_surface.get_rect(center=rect.center)
+            window.blit(text_surface, text_rect)
+
+
+# ------------------------------------
+
+class DiceAnimator:
+    def __init__(self, window_width=600, window_height=400, dice_image_path="diceroll/images"):
+        pygame.init()
+        self.window_width = window_width
+        self.window_height = window_height
+        self.window = None
+        self.dice_image_path = dice_image_path
+        self.dice_sets = {} # Will hold d6 images {color: [img1, ...]}
+        self.base_dice_images = {} # Will hold base images {size: img}
+        self.load_images() # Renamed from load_dice_sets
+
+        if not self.dice_sets and not self.base_dice_images:
+             raise ValueError(f"No dice images (d6 sets or base images) found in '{dice_image_path}'. Cannot animate.")
+
         try:
-            roll_result = self.dice_roller.roll_dice(dice_notation)
-            if animate and pygame_available:
-                self.animate_dice_roll(dice_notation)
-            elif animate and not pygame_available:
-                print("Pygame is not available. Skipping animation.")
+            self.font = pygame.font.Font(None, 36)
+            self.large_font = pygame.font.Font(None, 72)
+            self.outcome_font = pygame.font.Font(None, 48)
+            self.die_number_font = pygame.font.Font(None, 40) # Font for numbers on dice
+        except pygame.error as e:
+            print(f"Pygame font error: {e}. Using fallback SysFont.")
+            self.font = pygame.font.SysFont('Arial', 36)
+            self.large_font = pygame.font.SysFont('Arial', 72)
+            self.outcome_font = pygame.font.SysFont('Arial', 48)
+            self.die_number_font = pygame.font.SysFont('Arial', 30, bold=True)
 
-            # Set console text color based on dice_color
-            if dice_color == DiceColor.RED:
-                console_color = '\033[91m'  # Red
-            elif dice_color == DiceColor.BLUE:
-                console_color = '\033[94m'  # Light blue
-            elif dice_color == DiceColor.GREEN:
-                console_color = '\033[92m'  # Green
-            elif dice_color == DiceColor.BLACK:
-                console_color = '\033[97m'  # White (for visibility)
-            elif dice_color == 'bread':
-                console_color = '\033[97m'  # White (default) for 'bread' color
+        self.animation_speed = 1.0
+        self.animation_style = AnimationStyle.SHAKE
+
+    def load_images(self):
+        """Loads both d6 sets and base dice images with enhanced path handling."""
+        print(f"--- Loading Images from: {self.dice_image_path} ---")
+        base_path = os.path.abspath(self.dice_image_path)
+        print(f"Absolute base path: {base_path}")
+
+        today = datetime.today()
+        # Check current date (May 29th, 2025) - Not a special day
+        is_special_day = (today.month == 10 and today.day == 31) or (today.month == 4 and today.day == 1)
+        d6_colors = ['bread'] if is_special_day else [DiceColor.RED, DiceColor.WHITE, DiceColor.BLUE, DiceColor.BLACK]
+        base_sizes = [4, 8, 10, 12, 20]
+
+        # Load d6 sets
+        print("--- Loading D6 Sets ---")
+        for color in d6_colors:
+            dice_set = []
+            image_dir = os.path.join(self.dice_image_path, color)
+            print(f"Checking D6 dir: {os.path.abspath(image_dir)}")
+            if not os.path.isdir(image_dir):
+                print(f" -> Not found or not a directory.")
+                continue
+
+            for i in range(1, 7):
+                image_path = os.path.join(image_dir, f"dice{i}.jpg")
+                if os.path.exists(image_path):
+                    try:
+                       # --- CRITICAL: Ensure .convert_alpha() is NOT here ---
+                       img = pygame.image.load(image_path)
+                       dice_set.append(pygame.transform.scale(img, (60, 60))) # Scale d6
+                    except pygame.error as e: print(f" -> Error loading {image_path}: {e}")
+            if dice_set:
+                self.dice_sets[color] = dice_set
+                print(f" -> Loaded {len(dice_set)} images for '{color}'.")
             else:
-                console_color = '\033[97m'  # White (default)
+                 print(f" -> No images loaded for '{color}'.")
 
-            print(f"{console_color}Dice Notation: {dice_notation}")
-            print(f"Roll Result: {roll_result['roll_result']}")
-            print(f"Roll Details: {roll_result['roll_details']}\033[0m")  # Reset color
 
-            return roll_result
-        except ValueError as e:
-            print(f"\033[91mInvalid dice notation: {dice_notation}. Error: {str(e)}\033[0m")
-            return None
+        # Load base images
+        print("--- Loading Base Images ---")
+        for size in base_sizes:
+            image_path = os.path.join(self.dice_image_path, f"blank_d{size}.png")
+            print(f"Checking base image: {os.path.abspath(image_path)}")
+            if os.path.exists(image_path):
+                try:
+                    # --- CRITICAL: Ensure .convert_alpha() is NOT here ---
+                    img = pygame.image.load(image_path)
+                    self.base_dice_images[size] = pygame.transform.scale(img, (70, 70)) # Scale base dice
+                    print(f" -> Loaded blank_d{size}.png")
+                except pygame.error as e: print(f" -> Error loading {image_path}: {e}")
+            else:
+                print(f" -> Not found: blank_d{size}.png")
 
-    def roll_single_dice(self, dice_type, dice_color=DiceColor.WHITE, animate=True):
-        return self.roll_dice(dice_type, dice_color=dice_color, animate=animate)
+        print("--- Image Loading Finished ---")
 
-    def roll_multiple_dice_of_same_type(self, dice_type, num_dice, dice_color=DiceColor.WHITE, animate=True):
-        dice_notation = f"{num_dice}{dice_type}"
-        return self.roll_dice(dice_notation, dice_color=dice_color, animate=animate)
+        # Check if *any* images were loaded
+        if not self.dice_sets and not self.base_dice_images:
+             raise ValueError(f"No dice images (d6 sets or base images) found in '{self.dice_image_path}'. Cannot animate.")
+        elif not self.base_dice_images:
+             print("Warning: No base dice images (d4, d8, etc.) were loaded.")
+        elif not self.dice_sets:
+             print("Warning: No d6 image sets (red, blue, etc.) were loaded.")
 
-    def roll_multiple_dice(self, dice_notations, dice_colors=None, target_values=None, animate=True):
-        if dice_colors is None:
-            dice_colors = [DiceColor.WHITE] * len(dice_notations)
-        if target_values is None:
-            target_values = [None] * len(dice_notations)
+    def _display_text_only(self, roll_result, dice_and_target_text):
+        """Displays only the total result as text."""
+        # (Implementation is the same as before, ensure it uses self.window etc.)
+        self.window.fill((255, 255, 255))
+        dice_and_target_render = self.font.render(dice_and_target_text, True, (0, 0, 0))
+        dice_and_target_rect = dice_and_target_render.get_rect(midtop=(self.window_width // 2, 10))
+        self.window.blit(dice_and_target_render, dice_and_target_rect)
 
-        roll_results = []
-        for i, dice_notation in enumerate(dice_notations):
-            roll_result = self.roll_dice(dice_notation, dice_color=dice_colors[i], target_value=target_values[i], animate=animate)
-            roll_results.append(roll_result)
-        return roll_results
+        result_text = self.large_font.render(f"{roll_result['roll_result']}", True, (0, 0, 0))
+        result_rect = result_text.get_rect(center=(self.window_width // 2, self.window_height // 2))
+        self.window.blit(result_text, result_rect)
 
-    def get_roll_sum(self, roll_result):
-        return sum(roll_result['roll_details'])
+        if 'outcome_text' in roll_result:
+            outcome_text_render = self.outcome_font.render(roll_result['outcome_text'], True, (0, 128, 0) if roll_result['success'] else (255, 0, 0))
+            outcome_rect = outcome_text_render.get_rect(midbottom=(self.window_width // 2, self.window_height - 10))
+            self.window.blit(outcome_text_render, outcome_rect)
 
-    def get_roll_average(self, roll_result):
-        roll_details = roll_result['roll_details']
-        return sum(roll_details) / len(roll_details)
+        pygame.display.flip()
 
-    def get_roll_max(self, roll_result):
-        return max(roll_result['roll_details'])
 
-    def get_roll_min(self, roll_result):
-        return min(roll_result['roll_details'])
+    def _display_multiple_dice(self, roll_result, dice_color, dice_and_target_text, all_dice_defs):
+        """Handles animation and display for multiple dice."""
+        dice_list = []
+        d6_set_to_use = self.dice_sets.get(dice_color) # Get the specific color d6 set
 
-    def get_roll_statistics(self, dice_notation, num_rolls):
-        return self.dice_roller.get_roll_statistics(dice_notation, num_rolls)
+        # --- Create DieSprite objects ---
+        num_dice = len(all_dice_defs)
+        for i, die_size in enumerate(all_dice_defs):
+            x = self.window_width / (num_dice + 1) * (i + 1)
+            y = self.window_height / 2 + random.randint(-20, 20)
+            die = DieSprite(x, y, die_size, d6_set_to_use, self.base_dice_images, self.die_number_font)
+            die.set_final_value(roll_result['roll_details'][i])
+            dice_list.append(die)
 
-    def save_roll_history_to_file(self, file_path):
-        roll_history = self.dice_roller.get_roll_history()
-        with open(file_path, 'w') as file:
-            json.dump(roll_history, file)
+        clock = pygame.time.Clock()
+        shake_duration = 1.0 / self.animation_speed
 
-    def load_roll_history_from_file(self, file_path):
-        with open(file_path, 'r') as file:
-            roll_history = json.load(file)
-        self.dice_roller.set_roll_history(roll_history)
-        return roll_history
+        dice_and_target_render = self.font.render(dice_and_target_text, True, (0, 0, 0))
+        dice_and_target_rect = dice_and_target_render.get_rect(midtop=(self.window_width // 2, 10))
 
-    def get_last_roll_total(self):
-        return self.dice_roller.get_last_roll_total()
+        # --- Animation Loop ---
+        start_time = time.time()
+        while time.time() - start_time < shake_duration:
+            duration_ratio = (time.time() - start_time) / shake_duration
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return None
 
-    def get_last_roll_details(self):
-        return self.dice_roller.get_last_roll_details()
+            self.window.fill((255, 255, 255))
+            self.window.blit(dice_and_target_render, dice_and_target_rect)
 
-    def get_last_5_rolls(self):
-        return self.dice_roller.get_last_5_rolls()
+            for die in dice_list:
+                die.update_animation(self.animation_style, duration_ratio)
+                die.draw_animated(self.window)
 
-    def get_available_dice_colors(self):
-        return [color_value for color_name, color_value in DiceColor.__dict__.items() if not color_name.startswith("__")]
+            pygame.display.flip()
+            clock.tick(30)
 
-    def enable_roll_saving(self):
-        self.dice_roller.save_rolls = True
+        # --- Final Display Loop ---
+        self.window.fill((255, 255, 255))
+        self.window.blit(dice_and_target_render, dice_and_target_rect)
 
-    def disable_roll_saving(self):
-        self.dice_roller.save_rolls = False
+        die_width = 70 # Use average/max size
+        spacing = 20
+        total_width = (num_dice * die_width) + ((num_dice - 1) * spacing)
+        start_x = (self.window_width - total_width) / 2 + (die_width / 2)
 
-    def set_animation_style(self, style=AnimationStyle.SHAKE):
-        self.dice_animator.set_animation_style(style)
+        for i, die in enumerate(dice_list):
+            pos_x = start_x + i * (die_width + spacing)
+            die.draw_final(self.window, pos_x, self.window_height / 2 - 40)
 
-    def roll_saving_throw(self, dice_type=DiceType.D20, dice_color=DiceColor.WHITE, target_value=None, success_threshold=None, animate=True):
-        if success_threshold is None:
-            success_threshold = target_value
+        total_text = self.large_font.render(f"Total: {roll_result['roll_result']}", True, (0, 0, 0))
+        total_rect = total_text.get_rect(center=(self.window_width // 2, self.window_height / 2 + 60))
+        self.window.blit(total_text, total_rect)
 
-        roll_result = self.roll_dice(dice_type, dice_color=dice_color, target_value=target_value, animate=animate)
+        if 'outcome_text' in roll_result:
+             outcome_text_render = self.outcome_font.render(roll_result['outcome_text'], True, (0, 128, 0) if roll_result['success'] else (255, 0, 0))
+             outcome_rect = outcome_text_render.get_rect(midbottom=(self.window_width // 2, self.window_height - 10))
+             self.window.blit(outcome_text_render, outcome_rect)
 
-        if roll_result is not None:
-            success = roll_result['roll_result'] >= success_threshold
-            roll_result['success'] = success
+        pygame.display.flip()
+
+    def animate_dice_roll(self, dice_notation, dice_color, dice_roller, target=None):
+        today = datetime.today()
+        is_special_day = (today.month == 10 and today.day == 31) or (today.month == 4 and today.day == 1)
+        if is_special_day:
+            dice_color = 'bread'
+
+        # Ensure selected color (or bread) d6 set exists if needed, or default
+        if dice_color not in self.dice_sets:
+            print(f"Warning: D6 set for '{dice_color}' not found, using blue.")
+            dice_color = DiceColor.BLUE
+            if dice_color not in self.dice_sets:
+                 print("Warning: Default 'blue' D6 set also not found. Only non-d6 rolls can show d6 images.")
+
+
+        self.window = pygame.display.set_mode((self.window_width, self.window_height))
+        pygame.display.set_caption("Dice Roll")
+
+        roll_result = dice_roller.roll_dice(dice_notation, target=target)
+        if not roll_result: return None
+
+        dice_and_target_text = f"{dice_notation}"
+        if target: dice_and_target_text += f" (Target: {target})"
+
+        # --- New Parsing Logic ---
+        matches = re.findall(r"(\d+)d(\d+)", dice_notation, re.IGNORECASE)
+        all_dice_defs = []
+        can_display_all = True
+
+        if not matches: # If parsing fails, use text only
+            can_display_all = False
+        else:
+            for num_str, size_str in matches:
+                num = int(num_str)
+                size = int(size_str)
+                for _ in range(num):
+                    all_dice_defs.append(size)
+                    # Check if we can display this die type
+                    if not (size == 6 and self.dice_sets.get(dice_color)) and size not in self.base_dice_images:
+                        can_display_all = False
+                        break
+                if not can_display_all: break
+
+        # Check if number of dice matches results
+        if can_display_all and len(all_dice_defs) != len(roll_result['roll_details']):
+            print("Warning: Mismatch between parsed dice and roll results. Using text display.")
+            can_display_all = False
+
+        # --- Decide which display method to use ---
+        if can_display_all:
+            self._display_multiple_dice(roll_result, dice_color, dice_and_target_text, all_dice_defs)
+        else:
+            print("Info: Cannot visually represent all dice, showing text result only.")
+            self._display_text_only(roll_result, dice_and_target_text)
+
+        # --- Wait for close ---
+        waiting = True
+        while waiting:
+             for event in pygame.event.get():
+                 if event.type == pygame.QUIT:
+                     waiting = False
+                 if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                     waiting = False
 
         return roll_result
 
-    def roll_multiple_saving_throws(self, num_throws, dice_type=DiceType.D20, dice_color=DiceColor.WHITE, target_values=None, success_thresholds=None, animate=True):
-        if target_values is None:
-            target_values = [None] * num_throws
-        if success_thresholds is None:
-            success_thresholds = target_values
-
-        saving_throw_results = []
-        for i in range(num_throws):
-            saving_throw_result = self.roll_saving_throw(dice_type, dice_color=dice_color, target_value=target_values[i], success_threshold=success_thresholds[i], animate=animate)
-            saving_throw_results.append(saving_throw_result)
-
-        return saving_throw_results
-
-    def enable_console_logging(self):
-        self.log_console = True
-        logs_dir = 'logs'
-        if not os.path.exists(logs_dir):
-            os.makedirs(logs_dir)
-
-        current_datetime = datetime.now().strftime("%d%m_%H%M")
-        log_file = os.path.join(logs_dir, f'diceroll_log_{current_datetime}.txt')
-
-        sys.stdout = Logger(log_file)
-        sys.stderr = Logger(log_file)
-
-    def disable_console_logging(self):
-        self.log_console = False
-        sys.stdout = sys.__stdout__
-        sys.stderr = sys.__stderr__
-
-class DiceAnimator:
-    def load_dice_sets(self):
-        dice_sets = {}
-
+    def run_animation(self, dice_notation, dice_color=DiceColor.BLUE, target=None, save_rolls=False):
         today = datetime.today()
-        if (today.month == 10 and today.day == 31) or (today.month == 4 and today.day == 1):
-            colors = ['bread']
-        else:
-            colors = [DiceColor.RED, DiceColor.WHITE, DiceColor.BLUE, DiceColor.BLACK]
+        is_special_day = (today.month == 10 and today.day == 31) or (today.month == 4 and today.day == 1)
+        if is_special_day:
+            dice_color = 'bread'
 
-        for color in colors:
-            dice_set = []
-            for i in range(1, 7):
-                image_path = os.path.join(self.dice_image_path, color, f"dice{i}.jpg")
-                if os.path.exists(image_path):
-                    dice_set.append(pygame.image.load(image_path))
-            if dice_set:
-                dice_sets[color] = dice_set
+        dice_roller = DiceRoller(save_rolls=save_rolls)
+        roll_result = self.animate_dice_roll(dice_notation, dice_color, dice_roller, target)
+        return roll_result
 
-        return dice_sets
+    # --- Other Setters ---
+    def set_window_size(self, width, height):
+        self.window_width = width
+        self.window_height = height
 
-    def __init__(self, window_width=200, window_height=270, dice_image_path="dice_imgs"):
-        self.window_width = window_width
-        self.window_height = window_height
-        self.dice_image_path = dice_image_path
-        self.dice_sets = self.load_dice_sets()
-        if not self.dice_sets:
-            raise ValueError(f"No dice image sets found in the '{dice_image_path}' directory.")
-        self.font = None
-        self.animation_speed = 1.0
-        self.custom_dice_faces = {}
-        self.success_animation = None
-        self.failure_animation = None
-        self.animation_style = AnimationStyle.SHAKE
+    def set_dice_image_path(self, path):
+        self.dice_image_path = path
+        self.load_images() # Reload images
 
-    def display_shake_animation(self, surface, dice_images, roll_results, start_time, animation_duration):
-        current_time = pygame.time.get_ticks()
-        elapsed_time = (current_time - start_time) / 1000  # Convert milliseconds to seconds
-        shake_magnitude = 5 * math.sin(elapsed_time * 10)  # Adjust the magnitude and frequency of the shake as desired
+    def set_animation_style(self, style):
+        self.animation_style = style
 
-        surface.fill((255, 255, 255))  # Fill the surface with white
+    def set_animation_speed(self, speed):
+        self.animation_speed = speed
 
-        offset_x = 50  # Offset to move the dice images 50 pixels to the left
+    def set_custom_dice_faces(self, dice_notation, face_images):
+        print("Warning: Custom faces not currently supported in multi-die display.")
 
-        for i, result in enumerate(roll_results):
-            dice_image = dice_images[result - 1]
-            x = surface.get_width() // 2 + shake_magnitude - i * dice_image.get_width() * 1.2 - offset_x
-            y = surface.get_height() // 2
-            surface.blit(dice_image, (x, y))
-
-    def display_tumble_animation(self, surface, dice_images, roll_results, start_time, animation_duration):
-        elapsed_time = (pygame.time.get_ticks() - start_time) / 1000  # Convert milliseconds to seconds
-        tumble_speed = 360 / animation_duration  # Degrees per second
-        tumble_angle = elapsed_time * tumble_speed
-
-        surface.fill((255, 255, 255))  # Fill the surface with white
-
-        offset_x = 50  # Offset to move the dice images 50 pixels to the left
-
-        for i, result in enumerate(roll_results):
-            dice_image = dice_images[result - 1]
-            x = surface.get_width() // 2 - i * dice_image.get_width() * 1.2 - offset_x
-            y = surface.get_height() // 2
-            rotated_image = pygame.transform.rotate(dice_image, tumble_angle)
-            rotated_rect = rotated_image.get_rect(center=(x, y))
-            surface.blit(rotated_image, rotated_rect)
-
-    def display_spin_animation(self, surface, dice_images, roll_results, start_time, animation_duration):
-        elapsed_time = (pygame.time.get_ticks() - start_time) / 1000  # Convert milliseconds to seconds
-        spin_speed = 360 / animation_duration  # Degrees per second
-        spin_angle = elapsed_time * spin_speed
-
-        surface.fill((255, 255, 255))  # Fill the surface with white
-
-        offset_x = 50  # Offset to move the dice images 50 pixels to the left
-
-        for i, result in enumerate(roll_results):
-            dice_image = dice_images[result - 1]
-            x = surface.get_width() // 2 - i * dice_image.get_width() * 1.2 - offset_x
-            y = surface.get_height() // 2
-            rotated_image = pygame.transform.rotate(dice_image, spin_angle)
-            rotated_rect = rotated_image.get_rect(center=(x, y))
-            surface.blit(rotated_image, rotated_rect)
-
-    def animate_dice_roll(self, dice_notation, dice_color, dice_roller):
-        # Initialize Pygame
-        pygame.init()
-
-        # Create a surface for rendering the animation
-        surface = pygame.Surface((self.window_width, self.window_height))
-
-        # Load dice images
-        dice_images = self.dice_sets[dice_color]
-
-        # Set up the clock
-        clock = pygame.time.Clock()
-
-        # Perform the dice roll
-        num_dice = int(dice_notation.split("d")[0])
-        roll_results = [random.randint(1, 6) for _ in range(num_dice)]
-        roll_sum = sum(roll_results)
-
-        # Animation loop
-        start_time = pygame.time.get_ticks()
-        animation_duration = 1000  # Animation duration in milliseconds
-        frames = []
-
-        while pygame.time.get_ticks() - start_time < animation_duration:
-            # Clear the surface
-            surface.fill((255, 255, 255))
-
-            # Display the dice roll animation
-            if self.animation_style == AnimationStyle.SHAKE:
-                self.display_shake_animation(surface, dice_images, roll_results, start_time, animation_duration)
-            elif self.animation_style == AnimationStyle.TUMBLE:
-                self.display_tumble_animation(surface, dice_images, roll_results, start_time, animation_duration)
-            elif self.animation_style == AnimationStyle.SPIN:
-                self.display_spin_animation(surface, dice_images, roll_results, start_time, animation_duration)
-
-            # Convert the surface to an image data URI and add it to the frames list
-            image_data = pygame.image.tostring(surface, "RGB")
-            image_base64 = base64.b64encode(image_data).decode('utf-8')
-            frame_uri = f"data:image/png;base64,{image_base64}"
-            frames.append(frame_uri)
-
-            # Update the clock
-            clock.tick(60)
-
-        pygame.quit()
-        print(f"\t{{'roll_result': {roll_sum}, 'roll_details': {roll_results}}}")
-
-        return frames
+    def set_target_success_failure_animations(self, success_animation, failure_animation):
+         print("Warning: Success/Failure animations not currently supported in multi-die display.")
