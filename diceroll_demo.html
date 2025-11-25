@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>DiceRoll Canvas Demo (Python logic + JS visuals)</title>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.3/full/pyodide.js"></script>
+<style>
+  body {
+    background:#111; color:#ddd; font-family:"Fira Code", monospace;
+    margin:0; padding:20px;
+  }
+  h1 { text-align:center; color:#82eaff; }
+  button {
+    background:#2b2b2b; border:none; border-radius:6px;
+    color:white; padding:10px 18px; font-size:16px; cursor:pointer;
+  }
+  button:hover { background:#444; }
+  pre {
+    background:#1b1b1b; padding:15px; border-radius:8px;
+    height:280px; overflow-y:auto; font-size:14px; color:#aaffaa;
+  }
+  canvas {
+    display:block; margin:20px auto; border:1px solid #333;
+    background:#222;
+  }
+  .rollnum { color:#ffcc33; font-weight:bold; }
+</style>
+</head>
+<body>
+<h1>🎲 DiceRoll Canvas Demo</h1>
+<p>Python rolls the dice using <code>diceroll.py</code>, JavaScript draws the faces below.</p>
+<button id="rollBtn">🎲 Roll Dice</button>
+<pre id="output">Loading Pyodide...</pre>
+<canvas id="diceCanvas" width="640" height="320"></canvas>
+
+<script>
+const output = document.getElementById("output");
+const canvas = document.getElementById("diceCanvas");
+const ctx = canvas.getContext("2d");
+function log(txt){ output.innerHTML += txt + "<br>"; }
+
+function drawDie(x, y, size, value) {
+  const r = size / 10;
+  const half = size / 2;
+  ctx.fillStyle = "#eee";
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(x, y, size, size, 12);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#111";
+
+  const centers = {
+    1:[[0,0]],
+    2:[[-.25,-.25],[.25,.25]],
+    3:[[-.25,-.25],[0,0],[.25,.25]],
+    4:[[-.25,-.25],[-.25,.25],[.25,-.25],[.25,.25]],
+    5:[[-.25,-.25],[-.25,.25],[0,0],[.25,-.25],[.25,.25]],
+    6:[[-.25,-.4],[-.25,0],[-.25,.4],[.25,-.4],[.25,0],[.25,.4]]
+  }[value] || [[0,0]];
+
+  centers.forEach(([ox,oy])=>{
+    const cx = x + half + ox*size;
+    const cy = y + half + oy*size;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.fill();
+  });
+}
+
+function drawDiceFaces(values){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const spacing = 140;
+  const startX = (canvas.width - values.length*spacing + spacing)/2;
+  const y = 80;
+  values.forEach((v,i)=>drawDie(startX+i*spacing, y, 100, Math.abs(v)));
+  ctx.fillStyle = "#fff";
+  ctx.font = "24px Fira Code";
+  const total = values.reduce((a,b)=>a+b,0);
+  ctx.fillText(`Total: ${total}`, canvas.width/2-50, 260);
+}
+
+// simple animation (random flicker before showing result)
+function animateDice(values){
+  const frames = 15;
+  let f = 0;
+  const anim = setInterval(()=>{
+    if (f < frames){
+      drawDiceFaces(values.map(()=>Math.ceil(Math.random()*6)));
+      f++;
+    } else {
+      clearInterval(anim);
+      drawDiceFaces(values);
+    }
+  }, 80);
+}
+
+async function rollDicePython(pyodide){
+  const code = `
+from diceroll import DiceRoller
+roller = DiceRoller()
+res = roller.roll_dice("3d6")
+res
+`;
+  return await pyodide.runPythonAsync(code);
+}
+
+async function main(){
+  const pyodide = await loadPyodide();
+  log("✅ Pyodide loaded successfully.");
+
+  // Load your real Python files
+  const fetchAndWrite = async (path)=>{
+    const r = await fetch(path);
+    if (!r.ok) throw new Error("Missing "+path);
+    const t = await r.text();
+    await pyodide.FS.writeFile(path,t);
+    log("Loaded "+path);
+  };
+  await fetchAndWrite("diceroll.py");
+  try { await fetchAndWrite("diceroll_api.py"); } catch{}
+
+  async function doRoll(){
+    output.innerHTML = "Rolling dice...<br>";
+    const result = await rollDicePython(pyodide);
+    const details = result.roll_details || [];
+    const total = result.roll_result;
+    const html = JSON.stringify(result, null, 2)
+      .replace(/(\\d+)/g,'<span class="rollnum">$1</span>');
+    output.innerHTML = html;
+    animateDice(details.length?details:[Math.ceil(Math.random()*6)]);
+  }
+
+  document.getElementById("rollBtn").onclick = doRoll;
+  doRoll();
+}
+
+main();
+</script>
+</body>
+</html>

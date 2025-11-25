@@ -1,0 +1,25 @@
+Result 1:
+  Dice Notation: 1d4
+  Roll Result: 2
+  Roll Details: [2]
+
+Result 2:
+  Dice Notation: 1d20
+  Roll Result: 8
+  Roll Details: [8]
+
+Result 3:
+  Dice Notation: 1d4
+  Roll Result: 4
+  Roll Details: [4]
+
+Result 4:
+  Dice Notation: 1d20
+  Roll Result: 1
+  Roll Details: [1]
+
+Result 5:
+  Dice Notation: 1d20
+  Roll Result: 17
+  Roll Details: [17]
+

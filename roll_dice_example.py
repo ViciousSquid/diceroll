@@ -1,5 +1,5 @@
 # Fixed import statement: Use 'diceroll_api' and 'dicerollAPI'
-from diceroll_api import dicerollAPI
+from diceroll_api import DiceRoller
 
 print("--- Dice Roller Console Example ---")
 
