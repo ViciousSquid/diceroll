@@ -164,11 +164,13 @@ class DiceRollerTests(unittest.TestCase):
 
 class APITests(unittest.TestCase):
     def test_import_is_headless_and_quiet(self):
-        output = io.StringIO()
-        with redirect_stdout(output):
-            importlib.reload(importlib.import_module("diceroll"))
-            importlib.reload(importlib.import_module("diceroll_api"))
-        self.assertEqual(output.getvalue(), "")
+        import subprocess
+        import sys
+        completed = subprocess.run(
+            [sys.executable, "-c", "import diceroll; import diceroll_api"],
+            capture_output=True, text=True, check=True,
+        )
+        self.assertEqual(completed.stdout, "")
 
     def test_legacy_api_and_fixed_sum(self):
         api = dicerollAPI(rng=random.Random(7))
