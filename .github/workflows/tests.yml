@@ -46,3 +46,57 @@ jobs:
           test -s dice_roll.svg
       - name: Verify no required third-party packages
         run: python -m pip check
+
+  pygame-optional:
+    name: Pygame animation (headless ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    env:
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+      PYGAME_HIDE_SUPPORT_PROMPT: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the package and optional pygame-ce
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --no-deps .
+          python -m pip install pygame-ce
+      - name: Run the full real-engine suite including animated surfaces
+        run: python -m unittest discover -s tests -v
+      - name: Verify auto detection, headless frames and final faces
+        run: |
+          python -I -c "import random,pygame; from diceroll import DiceRoller, PygameDiceAnimation, pygame_available, visualise; assert pygame_available(); r=DiceRoller(rng=random.Random(21)).roll('d20+5d6+d8',d6_colour='random'); a=visualise(r); assert isinstance(a,PygameDiceAnimation); screen=pygame.Surface((1000,800)); a.draw(screen,a.total_duration+0.1); assert tuple(f.face for f in a.frames(a.total_duration+0.1))==r.faces"
+      - name: Verify Pygame remains optional in package metadata
+        run: |
+          python -I -c "import importlib.metadata as m; assert not m.requires('vicioussquid-diceroll')"
+          python -m pip check
+
+  headless-cross-platform:
+    name: Real headless tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependency-free library
+        run: python -m pip install --no-deps .
+      - name: Run the actual integration suite
+        run: python -m unittest discover -s tests -v
+      - name: Verify isolated headless wheel usage
+        run: |
+          python -I -c "import importlib.metadata as m; assert not m.requires('vicioussquid-diceroll')"
+          python -I -c "import sys,random; from diceroll import DiceRoller,render_svg; r=DiceRoller(rng=random.Random(21)).roll('d20+5d6+d8',d6_colour='random'); assert r.total == 37; assert r.components[1].colours == ('red','white','blue','red','blue'); assert '<svg' in render_svg(r); assert not {'pygame','PyQt5','PIL','tkinter'} & set(sys.modules)"
+      - name: Dependency check
+        run: python -m pip check
