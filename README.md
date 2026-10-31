@@ -1,11 +1,11 @@
 # diceroll
 
-**[Full API reference](https://github.com/ViciousSquid/diceroll/blob/1.0.0.0/docs/API.md)** ·
+**[Full API reference](docs/API.md)**
 
 A **dependency-free, installable Python dice module**, extracted from the
-reusable parts of MiniWind's dice engine. No Pygame, Qt, game engine or graphical
-library is installed or imported. Dice values, colours and exact probability
-calculations are available to any project.
+reusable parts of MiniWind's dice engine. No Pygame, Qt or game engine is
+required; optional Pygame visualisation is available when installed.
+Dice values, colours and exact probability calculations are available to any project.
 
 The public interface is deliberately small: `DiceRoller.roll()`, immutable
 `RollResult` objects, `DiceRoller.distribution()` and the standard-library
@@ -168,3 +168,53 @@ rather than loosely structured dictionaries; `to_dict()` exists for
 serialisation.
 
 No MiniWind or Fio game logic is packaged. MIT licensed.
+
+
+## Optional auto-detected Pygame animation
+
+**No change to core requirements:** `diceroll` has zero runtime dependencies.
+SVG remains available in all environments. If `pygame` or `pygame-ce`
+is already installed, the library detects it and can animate rolls with
+independently tumbling and settling dice.
+
+```bash
+# Optional, for animated Pygame visualisation only:
+python -m pip install pygame-ce
+```
+
+```python
+from diceroll import DiceRoller, visualise, pygame_available
+
+result = DiceRoller().roll(
+    "2d4 + 5d6 + d12 + d20", d6_colour="random"
+)
+
+presentation = visualise(result, backend="auto")
+if pygame_available():
+    # PygameDiceAnimation: call draw(surface, elapsed_seconds)
+    # inside your existing Pygame frame loop.
+    animation = presentation
+else:
+    # No Pygame? presentation is self-contained SVG text.
+    svg = presentation
+```
+
+In a Pygame host, each die gets its own staggered start delay,
+face-cycle speed, rotation, bounce and stopping time. All dice
+settle on the **actual result faces and per-d6 colours**, without
+ever rerolling or changing game state. The host owns its window,
+event loop and frame clock. Importing the library never imports
+Pygame unless an animation is explicitly requested.
+
+To always get a predictable format use `backend="svg"` or
+`backend="pygame"`; automatic selection intentionally returns
+different types depending on the installed environment.
+
+Run the interactive example after installing Pygame:
+
+```bash
+python examples/pygame_animation.py
+```
+
+See the [full Pygame animation API](docs/API.md#optional-pygame-animation-no-required-dependency).
+

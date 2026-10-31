@@ -35,23 +35,27 @@ the SVG, use a browser or the host application's own UI facilities.
 
 ## Public symbol index
 
-These are the nine names exported from `diceroll`:
+These are the names exported from `diceroll`:
 
 | Symbol | Kind | Purpose |
 | --- | --- | --- |
-| `DiceRoller` | class | Roll dice, manage events/history, compute probabilities |
-| `RollResult` | frozen dataclass | Result of one normal/advantage/disadvantage roll |
-| `RollComponent` | frozen dataclass | Signed subtotal and dice faces for one expression term |
-| `DiceTerm` | frozen dataclass | A parsed signed dice or modifier term |
-| `DiceNotationError` | exception | Invalid or excessive dice expression |
-| `parse_dice_notation` | function | Strictly parse notation into `DiceTerm` objects |
-| `probability_target` | function | Convert a chance into a minimum successful face |
-| `roll_check` | function | Perform one generic probability check |
-| `render_svg` | function | Produce visual dice output without external dependencies |
+| `DiceRoller` | class | Roll dice, manage events/history and calculate probabilities |
+| `RollResult` | frozen dataclass | Immutable completed roll |
+| `RollComponent` | frozen dataclass | Signed component and individual coloured faces |
+| `DiceTerm` | frozen dataclass | Parsed dice or modifier expression term |
+| `DiceNotationError` | exception | Invalid dice expression |
+| `parse_dice_notation` | function | Strict expression parser |
+| `probability_target` | function | Chance-to-die-target conversion |
+| `roll_check` | function | Generic probability check |
+| `render_svg` | function | Static dependency-free SVG |
+| `pygame_available` | function | Detect installed Pygame without importing it |
+| `visualise` | function | Auto-select Pygame animation or SVG |
+| `PygameDiceAnimation` | class | Optional, caller-driven per-die tumbling animation |
+| `PygameDieFrame` | frozen dataclass | Snapshot of a die's visual state |
 
-There are no alternate class names or duplicate `roll_*` convenience
-methods. Import public names from `diceroll`, not from internal
-`diceroll.core` or `diceroll.svg` modules.
+Core calculations and SVG have **zero third-party dependencies**.
+Pygame is optional, auto-detected at runtime and imported only when a
+Pygame animation instance is constructed.
 
 ## Notation and parsing
 
@@ -411,6 +415,124 @@ per-die colour metadata. The result may be large because image data is
 embedded; consider caching SVGs in applications that repeatedly show
 the same roll.
 
+## Optional Pygame animation (no required dependency)
+
+Install Pygame separately **only if the host application wants it**:
+
+```console
+python -m pip install pygame-ce
+```
+
+The package dependency list remains empty. Both `pygame-ce` and classic
+`pygame` provide the importable `pygame` module. Merely importing
+`diceroll` **never imports Pygame** or starts a display.
+
+### `pygame_available() -> bool`
+
+Uses `importlib.util.find_spec("pygame")` to check whether the module
+is importable, **without importing Pygame or initialising SDL**. It
+does not test a display, audio device or image-decoder availability.
+
+### `visualise(result: RollResult, *, backend: str = "auto", **options) -> PygameDiceAnimation | str`
+
+Selects and instantiates the available representation:
+
+| `backend` | Returned value |
+|---|---|
+| `"auto"` (default) | `PygameDiceAnimation` when Pygame is installed; otherwise SVG markup `str` |
+| `"pygame"` | `PygameDiceAnimation`; raises `ImportError` with an installation hint when unavailable |
+| `"svg"` | Always returns self-contained SVG `str` |
+
+`options` accepts `die_size`, `columns`, `title` for both backends;
+Pygame additionally accepts `seed` and `duration`.
+
+```python
+from diceroll import DiceRoller, visualise, pygame_available
+
+result = DiceRoller().roll("2d4 + 4d6 + d12", d6_colour="random")
+presentation = visualise(result)   # automatically chooses an installed backend
+
+if pygame_available():
+    # presentation is a PygameDiceAnimation, ready to draw in a host loop
+    ...
+else:
+    # presentation is standalone SVG text
+    ...
+```
+
+When the application requires a **consistent return type**, request
+`backend="svg"` or `backend="pygame"` explicitly rather than `auto`.
+
+### `PygameDiceAnimation(result: RollResult, *, seed: int = 0, duration: float = 1.25, die_size: int = 84, columns: int = 6, title: str | None = None)`
+
+Creates an animation from an **already completed** dice roll.
+Every die has its own staggered start time, rolling face cadence,
+rotation, bounce and settling time. The animation RNG is separate
+from the roller's RNG, so previews cannot change the rolled result.
+
+| Parameter | Description |
+|---|---|
+| `result` | Immutable `RollResult` (does not reroll) |
+| `seed` | Seed used exclusively to derive repeatable animation timings |
+| `duration` | Base animation length in seconds; individual dice have staggered durations (must be positive/finite) |
+| `die_size` | Die size in pixels, integer from 40 through 256 |
+| `columns` | Number of dice per row, integer from 1 through 20 |
+| `title` | Optional title, defaulting to the original expression |
+
+Properties and methods:
+
+| API | Description |
+|---|---|
+| `animation.timings` | Tuple of per-die `(start_seconds, settle_seconds)` |
+| `animation.total_duration` | Time (seconds) at which the **last die** settles |
+| `animation.panel_size` | `(width, height)` for the rendered panel |
+| `animation.frames(elapsed: float)` | Return a deterministic tuple of `PygameDieFrame` states |
+| `animation.is_finished(elapsed: float)` | Whether all dice have settled |
+| `animation.draw(surface: pygame.Surface, elapsed: float, *, center: tuple[int,int] | None = None) -> pygame.Rect` | Draw one frame onto the caller's Surface and return occupied area |
+
+The public `PygameDieFrame` frozen dataclass exposes
+`sides`, `face`, `colour`, `angle`, `offset_x`,
+`offset_y`, `scale`, and `settled`. These are
+**presentation values**, not alternative game outcomes.
+
+At or after `total_duration`, every die has the **exact**
+face and colour stored in the original `RollResult`, with no
+remaining movement. During animation, each die cycles preview
+faces independently. D6s use the actual red, white and blue
+bundled artwork; d4/d8/d10/d12/d20 use MiniWind artwork;
+nonstandard dice use vector fallback shapes.
+
+The renderer has **no window lifecycle** and does not poll events,
+call `pygame.display.flip()`, or tick a frame clock. The
+host application owns the Surface and calls `draw` each frame.
+
+#### Embedded Pygame integration
+
+```python
+import time
+import pygame
+from diceroll import DiceRoller, PygameDiceAnimation
+
+# Existing application owns the Pygame window and frame loop.
+result = DiceRoller().roll("d4 + 4d6 + d20", d6_colour="random")
+animation = PygameDiceAnimation(result, seed=7, duration=1.4)
+
+started = time.perf_counter()
+# During each frame of your existing pygame loop:
+elapsed = time.perf_counter() - started
+animation.draw(your_existing_surface, elapsed)
+# Your application then flips the screen / handles events as usual.
+```
+
+For a complete runnable window example, see
+[`examples/pygame_animation.py`](../examples/pygame_animation.py).
+It demonstrates independent tumbles on the caller-owned Pygame
+window, without introducing a required dependency for other users.
+
+Invalid configuration or elapsed time raises `ValueError`; missing
+Pygame raises `ImportError`. Pygame's usual image/font errors
+may propagate if its installation is broken.
+
 ## Working with exceptions
 
 ```python
@@ -429,8 +551,9 @@ large distributions, `TypeError` for an invalid target, and ordinary
 
 ## Integration considerations
 
-- **No external dependencies:** import and roll on any supported Python
-  platform. Only the standard library is used.
+- **No required third-party dependencies:** importing the dice engine and
+  rendering SVG use only the standard library. Pygame is imported only when
+  a caller constructs an optional animation.
 - **Rendering and rules are separate:** use `result` directly in a game,
   backend or test; call `render_svg` only when a picture is needed.
 - **No implicit file writes:** callers explicitly request
@@ -452,6 +575,7 @@ python -m unittest discover -s tests -v
 ```
 
 The repository's CI builds and installs a wheel and runs the suite on
-Python 3.10, 3.12 and 3.14. The tests verify dice notation,
-seeded randomness, colour metadata, probabilities, history, the
-bundled artwork and dependency-free SVG output.
+Python 3.10, 3.12 and 3.14. Separate headless Pygame-enabled jobs exercise
+animation surfaces on Linux, macOS and Windows. The tests verify dice
+notation, seeded randomness, colour metadata, probabilities, history, the
+bundled artwork, dependency-free SVG and independently timed tumbling dice.
