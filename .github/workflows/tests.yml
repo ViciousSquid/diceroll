@@ -36,8 +36,13 @@ jobs:
           python -m pip install --no-deps --force-reinstall dist/*.tar.gz
           cd /tmp
           python -c "from diceroll import DiceRoller, render_svg; r=DiceRoller().roll('2d4+3d6+d8+d10+d12+d20', d6_colour='random'); assert len(r.faces) == 9; assert 'data:image/' in render_svg(r)"
-      - name: Verify API reference is shipped in source distribution
+      - name: Verify documentation and example are shipped in source distribution
         run: |
-          python -c "import tarfile,glob; f=tarfile.open(glob.glob('dist/*.tar.gz')[0]); assert any(x.name.endswith('/docs/API.md') for x in f.getmembers())"
+          python -c "import tarfile,glob; f=tarfile.open(glob.glob('dist/*.tar.gz')[0]); names=[x.name for x in f.getmembers()]; assert all(any(x.endswith('/'+p) for x in names) for p in ('docs/API.md','docs/PUBLISHING.md','examples/roll_and_render.py'))"
+      - name: Run example against the installed source distribution
+        run: |
+          cd /tmp
+          python "$GITHUB_WORKSPACE/examples/roll_and_render.py"
+          test -s dice_roll.svg
       - name: Verify no required third-party packages
         run: python -m pip check

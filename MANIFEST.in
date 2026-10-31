@@ -1,5 +1,7 @@
 include LICENSE.txt
 include README.md
+include MANIFEST.in
 recursive-include docs *.md
+recursive-include examples *.py
 recursive-include diceroll/images *.png *.jpg
 recursive-include tests test_*.py

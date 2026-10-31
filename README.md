@@ -1,6 +1,6 @@
 # diceroll
 
-**[Full API reference](docs/API.md)** — public signatures, result types, parameters, errors, integration patterns, and SVG rendering.
+**[Full API reference](https://github.com/ViciousSquid/diceroll/blob/1.0.0.0/docs/API.md)** · **[First PyPI release guide](https://github.com/ViciousSquid/diceroll/blob/1.0.0.0/docs/PUBLISHING.md)**
 
 A **dependency-free, installable Python dice module**, extracted from the
 reusable parts of MiniWind's dice engine. No Pygame, Qt, game engine or graphical
@@ -13,6 +13,14 @@ The public interface is deliberately small: `DiceRoller.roll()`, immutable
 facades, GUI window ownership or implicit disk I/O.
 
 ## Install
+
+From PyPI after the initial release:
+
+```bash
+python -m pip install vicioussquid-diceroll
+```
+
+Or from a source checkout:
 
 ```bash
 python -m pip install .
