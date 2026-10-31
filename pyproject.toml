@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vicioussquid-diceroll"
+version = "3.0.0"
+description = "Dependency-free dice rolling and self-contained SVG visualisation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE.txt"]
+authors = [{name = "Rufus Pearce"}]
+keywords = ["dice", "random", "tabletop", "probability", "svg", "library"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Topic :: Games/Entertainment",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/ViciousSquid/diceroll"
+Source = "https://github.com/ViciousSquid/diceroll"
+Documentation = "https://github.com/ViciousSquid/diceroll/blob/1.0.0.0/docs/API.md"
+Issues = "https://github.com/ViciousSquid/diceroll/issues"
+
+[tool.setuptools]
+packages = ["diceroll"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+diceroll = ["images/*.png", "images/blue/*.png", "images/red/*.png", "images/white/*.jpg"]
