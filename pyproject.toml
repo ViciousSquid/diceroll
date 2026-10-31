@@ -22,7 +22,7 @@ dependencies = []
 [project.urls]
 Homepage = "https://github.com/ViciousSquid/diceroll"
 Source = "https://github.com/ViciousSquid/diceroll"
-Documentation = "https://github.com/ViciousSquid/diceroll/blob/feature/miniwind-dice-core-backport/docs/API.md"
+Documentation = "https://github.com/ViciousSquid/diceroll/blob/1.0.0.0/docs/API.md"
 Issues = "https://github.com/ViciousSquid/diceroll/issues"
 
 [tool.setuptools]
