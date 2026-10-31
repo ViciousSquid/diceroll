@@ -17,6 +17,7 @@ rendering code.
 | `test_probability_exhaustive.py` | Independently enumerated probability oracle, all six standard die types, signed/shifted distributions, reproducible sampling, check thresholds and safety limits |
 | `test_svg_assets.py` | Real bundled PNG/JPEG signatures; all 18 d6 face/colour combinations; MiniWind d4/d8/d10/d12/d20 assets; full base64 decode and comparison to shipped bytes; vector fallback; SVG layout and target text |
 | `test_headless_persistence.py` | Fresh isolated Python subprocesses with GUI imports forbidden, SVG without a window, JSON colour/history round-trips, immutable results and subscriber isolation |
+| `test_pygame_animation.py` | Optional real pygame-ce surfaces: independently timed motion, exact settled faces/colours, repeatable pixel output, auto-detection, renderer boundary and no window ownership |
 
 ## Golden RNG fixtures
 
@@ -41,12 +42,15 @@ dice within the same roll.
 3.10, 3.12 and 3.14 on Linux, plus **Linux, macOS and Windows** on
 Python 3.12. It builds the wheel and source distribution, installs
 them, and runs a separate `python -I` headless smoke test against the
-installed module. The installed package must declare **zero runtime
-dependencies** and may not import Pygame or Qt.
+installed module. Three additional native Linux/macOS/Windows jobs install
+**optional** `pygame-ce` and exercise the real animation against offscreen
+Pygame surfaces. The installed package must declare **zero runtime
+dependencies** and may not import Pygame or Qt merely by importing `diceroll`.
 
 Subprocess headless tests disable GUI display access and prohibit
 importing `pygame`, `PyQt5`, `PIL`, `tkinter` and `PySide6`.
-The tests never require a display server, audio device, GPU or fonts.
+The tests never require a display server, audio device or GPU. Optional
+Pygame rendering initialises its own font subsystem while running offscreen.
 
 ## Extending tests
 
