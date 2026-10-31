@@ -1,6 +1,6 @@
 # diceroll
 
-**[Full API reference](https://github.com/ViciousSquid/diceroll/blob/1.0.0.0/docs/API.md)** · **[First PyPI release guide](https://github.com/ViciousSquid/diceroll/blob/1.0.0.0/docs/PUBLISHING.md)**
+**[Full API reference](https://github.com/ViciousSquid/diceroll/blob/1.0.0.0/docs/API.md)** ·
 
 A **dependency-free, installable Python dice module**, extracted from the
 reusable parts of MiniWind's dice engine. No Pygame, Qt, game engine or graphical
@@ -12,28 +12,9 @@ The public interface is deliberately small: `DiceRoller.roll()`, immutable
 `render_svg()` presentation function. No legacy `dicerollAPI`, duplicate
 facades, GUI window ownership or implicit disk I/O.
 
-## Install
 
-From PyPI after the initial release:
 
-```bash
-python -m pip install vicioussquid-diceroll
-```
-
-Or from a source checkout:
-
-```bash
-python -m pip install .
-```
-
-From a development branch:
-
-```bash
-python -m pip install "git+https://github.com/ViciousSquid/diceroll.git@feature/miniwind-dice-core-backport"
-```
-
-Import it with `import diceroll`. The distributable package is named
-`vicioussquid-diceroll` to distinguish it from unrelated projects.
+Import it with `import diceroll`. 
 
 ## Roll any combination of dice
 
@@ -54,7 +35,7 @@ The parser supports `d4`, `2d6`, `d8`, `d10`, `d12`, `d20`,
 numeric modifiers and signed dice terms all work. It strictly rejects invalid
 syntax with `DiceNotationError` and imposes resource limits.
 
-### Select d6 colours when rolling
+### Select D6 colours when rolling
 
 ```python
 from diceroll import DiceRoller, render_svg
