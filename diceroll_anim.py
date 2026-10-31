@@ -4,7 +4,15 @@ import time
 import os
 import re
 from datetime import datetime
-from diceroll import DiceRoller
+from diceroll import DiceRoller, parse_dice_notation
+
+def _default_images_path():
+    """Resolve packaged dice images without depending on the current directory."""
+    try:
+        import diceroll_images
+        return os.path.dirname(diceroll_images.__file__)
+    except ImportError:
+        return os.path.join(os.path.dirname(__file__), "diceroll", "images")
 
 # Define DiceColor
 class DiceColor:
@@ -94,12 +102,12 @@ class DieSprite:
 # ------------------------------------
 
 class DiceAnimator:
-    def __init__(self, window_width=600, window_height=400, dice_image_path="diceroll/images"):
+    def __init__(self, window_width=600, window_height=400, dice_image_path=None):
         pygame.init()
         self.window_width = window_width
         self.window_height = window_height
         self.window = None
-        self.dice_image_path = dice_image_path
+        self.dice_image_path = dice_image_path or _default_images_path()
         self.raw_dice_sets = {}
         self.raw_base_images = {}
         self.processed_dice_sets = {}
@@ -277,20 +285,26 @@ class DiceAnimator:
 
         dice_and_target_text = f"{dice_notation}" + (f" (Target: {target})" if target else "")
 
-        matches = re.findall(r"(\d+)d(\d+)", dice_notation, re.IGNORECASE)
+        terms, _ = parse_dice_notation(dice_notation)
         all_dice_defs = []
         can_display_all = True
-        if not matches: can_display_all = False
-        else:
-            for num_str, size_str in matches:
-                num, size = int(num_str), int(size_str)
-                for _ in range(num):
-                    all_dice_defs.append(size)
-                    can_show_d6 = (size == 6 and dice_color and self.processed_dice_sets.get(dice_color))
-                    can_show_base = (size != 6 and size in self.processed_base_images)
-                    if not (can_show_d6 or can_show_base):
-                        can_display_all = False; break
-                if not can_display_all: break
+        for term in terms:
+            if not term.sides:
+                continue
+            for _ in range(term.count):
+                all_dice_defs.append(term.sides)
+                can_show_d6 = (
+                    term.sides == 6 and dice_color
+                    and self.processed_dice_sets.get(dice_color)
+                )
+                can_show_base = (
+                    term.sides != 6 and term.sides in self.processed_base_images
+                )
+                if not (can_show_d6 or can_show_base):
+                    can_display_all = False
+                    break
+            if not can_display_all:
+                break
         if can_display_all and len(all_dice_defs) != len(roll_result['roll_details']):
             can_display_all = False
 
