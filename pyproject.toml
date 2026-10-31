@@ -14,7 +14,6 @@ authors = [{name = "Rufus Pearce"}]
 keywords = ["dice", "tabletop", "probability", "random", "library"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Topic :: Games/Entertainment",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
