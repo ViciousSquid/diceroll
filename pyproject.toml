@@ -19,6 +19,12 @@ classifiers = [
 ]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/ViciousSquid/diceroll"
+Source = "https://github.com/ViciousSquid/diceroll"
+Documentation = "https://github.com/ViciousSquid/diceroll/blob/feature/miniwind-dice-core-backport/docs/API.md"
+Issues = "https://github.com/ViciousSquid/diceroll/issues"
+
 [tool.setuptools]
 packages = ["diceroll"]
 include-package-data = true
