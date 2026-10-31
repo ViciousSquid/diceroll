@@ -1,4 +1,4 @@
-name: Library tests
+name: Python library tests
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  package:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -17,11 +17,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install headless library
-        run: python -m pip install .
-      - name: Run unit tests
+      - name: Build and install wheel
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+          python -m build --wheel
+          python -m pip install dist/*.whl
+      - name: Execute unit tests
         run: python -m unittest discover -s tests -v
-      - name: Check installed imports without repository on path
+      - name: Import installed module outside the checkout
         run: |
           cd /tmp
-          python -c "from diceroll import DiceRoller; from diceroll_api import DiceAPI; import diceroll_images; assert DiceAPI().roll_dice('d20+2')['roll_result'] >= 3"
+          python -c "import sys; from diceroll import DiceRoller, render_svg; r=DiceRoller().roll('d4 + d6 + d8 + d10 + d12 + d20', d6_colour='red'); assert '<svg' in render_svg(r); assert 'pygame' not in sys.modules"
+          python -c "import importlib.util; assert importlib.util.find_spec('diceroll_api') is None; assert importlib.util.find_spec('diceroll_anim') is None"
+      - name: Verify no required third-party packages
+        run: python -m pip check

@@ -1,149 +1,179 @@
 # diceroll
 
-A small, reusable **Python dice library**. The core has **no third-party
-dependencies, no GUI, no automatic file writes, and no game-specific rules**.
-It grew out of the original diceroll project; the new parsing, seeded rolls,
-event listeners and structured results were developed further in MiniWind.
+A **dependency-free, installable Python dice module**, extracted from the
+reusable parts of MiniWind's dice engine. No Pygame, Qt, game engine or graphical
+library is installed or imported. Dice values, colours and exact probability
+calculations are available to any project.
 
-The existing Pygame renderer remains available as an optional feature. This
-library has no dependency on MiniWind, Fio, Qt, a game loop, or a specific RPG.
+The public interface is deliberately small: `DiceRoller.roll()`, immutable
+`RollResult` objects, `DiceRoller.distribution()` and the standard-library
+`render_svg()` presentation function. No legacy `dicerollAPI`, duplicate
+facades, GUI window ownership or implicit disk I/O.
 
 ## Install
 
-From a checkout:
-
-```sh
+```bash
 python -m pip install .
-# Optional Pygame animations:
-python -m pip install ".[animation]"
 ```
 
-Import `DiceRoller` from `diceroll`, or the higher-level `DiceAPI` (also
-available under its historic name `dicerollAPI`) from `diceroll_api`.
+From a development branch:
 
-## Quick start
+```bash
+python -m pip install "git+https://github.com/ViciousSquid/diceroll.git@feature/miniwind-dice-core-backport"
+```
+
+Import it with `import diceroll`. The distributable package is named
+`vicioussquid-diceroll` to distinguish it from unrelated projects.
+
+## Roll any combination of dice
 
 ```python
 from diceroll import DiceRoller
 
 dice = DiceRoller()
-result = dice.roll_dice("d20 + 2d6 - 3", target=15)
-print(result["roll_result"], result["success"])
-print(result["roll_details"])  # actual dice faces, excluding modifiers
-print(result["components"])    # each signed term and its subtotal
+result = dice.roll("2d4 + 3d6 + d8 + d10 + d12 + d20 - 5", target=42)
+
+print(result.total)       # complete signed total
+print(result.faces)       # all individual physical die results
+print(result.components)  # per-term signed subtotals and colours
+print(result.success)     # True, False or None (when no target)
 ```
 
-Notation supports `d20`, `2d6`, `3d8+1d4`, `d20+3`,
-`2d6-1d4+5` and whitespace. Malformed expressions raise
-`DiceNotationError` (a subclass of `ValueError`). Bounds protect against
-unreasonably large counts, die sizes, and probability requests. Arbitrary dice
-sides are supported; there is no imposed set of tabletop dice.
+The parser supports `d4`, `2d6`, `d8`, `d10`, `d12`, `d20`,
+`2d6-1d4+5` and arbitrary sizes such as `d7` or `2d100`. Mixed types,
+numeric modifiers and signed dice terms all work. It strictly rejects invalid
+syntax with `DiceNotationError` and imposes resource limits.
 
-### Reproducible rolls
+### Select d6 colours when rolling
+
+```python
+from diceroll import DiceRoller, render_svg
+from pathlib import Path
+
+dice = DiceRoller()
+red = dice.roll("4d6 + d20", d6_colour="red")
+white = dice.roll("4d6 + d20", d6_colour="white")
+blue = dice.roll("4d6 + d20", d6_colour="blue")
+mixed = dice.roll("12d6 + d4 + d12", d6_colour="random")
+
+# Each random d6 chooses independently from red / white / blue.
+for component in mixed.components:
+    if component.colours and any(c is not None for c in component.colours):
+        print(component.faces, component.colours)
+
+Path("mixed_dice.svg").write_text(render_svg(mixed), encoding="utf-8")
+```
+
+The default is `blue`. The `random` choice is **per individual d6**,
+not per entire roll. Different d6s can legitimately choose the same colour.
+Colours are stored alongside the exact dice faces in the result and JSON
+history. Every other die records no colour, because the available coloured
+artwork applies to the d6 only. Fixed colours never influence numerical dice
+results; random colours are selected only after all numeric dice have rolled.
+
+The original d6 red/white/blue face artwork is included in the wheel. MiniWind
+contributes its actual **d4, d8, d10, d12 and d20** illustrations. Together
+these cover all six standard tabletop dice. Other die types render as labelled
+vector shapes, so unusual expressions do not require additional image assets.
+
+## Visualise without Pygame
+
+```python
+from pathlib import Path
+from diceroll import DiceRoller, render_svg
+
+result = DiceRoller().roll("2d4 + 3d6 + d8 + d10 + d12 + d20",
+                           d6_colour="random")
+Path("roll.svg").write_text(render_svg(result), encoding="utf-8")
+```
+
+Open the SVG in any browser or embed it in a host application. The renderer
+returns **plain SVG text** and embeds image bytes using `data:` URIs, making
+the result self-contained. It neither creates windows nor depends on any
+graphics framework. It is deliberately static: application-specific animation
+and event loops belong to the host program.
+
+## Reproducible rolls and observable results
 
 ```python
 import random
-from diceroll_api import DiceAPI
+from diceroll import DiceRoller
 
-api = DiceAPI(rng=random.Random(7))
-assert api.roll_dice("2d6+2")["roll_result"] == 7
+dice = DiceRoller(rng=random.Random(7), history_limit=100)
+
+def on_roll(result):
+    print(result.source, result.context, result.total)
+
+dice.subscribe(on_roll)
+result = dice.roll(
+    "d20+2", mode="advantage", source="demo.skill",
+    context={"label": "Climbing", "why": "Rough rock"}
+)
+dice.unsubscribe(on_roll)
 ```
 
-Any instance providing `randint(a, b)` can be injected.
+`mode` is `normal`, `advantage` or `disadvantage`. The latter two roll
+twice and keep the higher or lower total. The discarded attempt's total is
+retained in `result.alternative_totals`. A custom RNG needs only `randint`.
+Callbacks receive a single immutable `RollResult`; subscriber exceptions
+are logged and do not undo a completed roll.
 
-### Events are UI-independent
-
-```python
-def on_roll(result, source, context):
-    print(source, result["roll_result"], context.get("label"))
-
-dice.add_roll_listener(on_roll)
-dice.request_roll("1d20", target=12, source="my-app.skill",
-                  context={"label": "Climbing check", "why": "Wet rock"})
-dice.remove_roll_listener(on_roll)
-```
-
-Subscribers receive `(result, source, context)`. An exception in a subscriber
-is logged but does not invalidate a completed dice roll. Build any visualisation
-as a subscriber, without coupling the dice service to that renderer.
-
-### Generic probability utilities
+## Exact distributions, checks, and simulation
 
 ```python
-from diceroll import DiceRoller, probability_target, roll_check
+from diceroll import DiceRoller, roll_check, probability_target
 
 dice = DiceRoller()
-distribution = dice.get_dice_probabilities("2d6")
-assert distribution[7] == 6 / 36
-
-target = probability_target(0.5, sides=20)  # 11: need 11 or higher
-result = roll_check(dice, 0.5, sides=20, label="Example")
+odds = dice.distribution("2d6-1d4+3")  # exact fractions for all totals
+check = roll_check(dice, 0.5, sides=20, label="Skill check")
+stats = dice.statistics("2d6", trials=1000)
 ```
 
-`probability_target` rounds probabilities to the nearest number of winning
-faces. Values too small to represent on the chosen die can become impossible
-(`target > sides`). This is deliberate: **the library does not impose
-MiniWind's game-specific rule that every nonzero chance must have a winning
-face**. If your application needs more granularity, select a die with more sides
-or perform its probability check using its own RNG.
+`distribution` supports signed mixed dice and modifiers, uses exact rational
+probabilities and never advances the RNG. Large calculations have bounded
+cost. `statistics` is Monte Carlo: it advances the RNG but does not emit
+events or add roll history. `probability_target` rounds to the chosen die's
+resolution, **not** MiniWind's game-specific minimum success chance. For
+a 1% chance on d20 the resulting check is impossible, rather than falsely
+offering 5%; use a larger-sided die when finer odds matter.
 
-Exact probability distributions currently support one positive homogeneous
-`NdM` term. Mixed terms and modifiers can still be rolled normally.
-
-### Optional history and explicit persistence
+## Explicit history storage
 
 ```python
-dice = DiceRoller(save_rolls=True)
-dice.roll_dice("1d6")
-dice.save_last_5_rolls("recent.txt")
-dice.save_roll_history_to_file("history.json")
-history = DiceRoller().load_roll_history_from_file("history.json")
+dice = DiceRoller(history_limit=100)  # default 5, 0 disables, None is unlimited
+dice.roll("d6", d6_colour="red")
+dice.save_history("rolls.json")       # the only operation that writes a file
+
+copy = DiceRoller()
+copy.load_history("rolls.json")
+result = copy.history[0]
+payload = result.to_dict()            # JSON-compatible dictionary
 ```
 
-`save_rolls=True` accumulates full history in memory. **It does not create
-files on every roll.** Writing requires an explicit file path. The five most
-recent rolls are always held in memory. `save_format="json"` changes the
-format used by `save_last_5_rolls`.
-
-`get_roll_statistics(expression, trials)` is a simulation helper; it does not
-emit events or alter the roll history.
-
-### Legacy API and optional animation
-
-```python
-from diceroll_api import dicerollAPI, DiceType
-
-api = dicerollAPI()
-api.roll_dice("1d20", target_value=10)
-api.roll_saving_throw(DiceType.D20, target_value=12)
-api.roll_with_advantage("2d6")
-```
-
-The separate `diceroll_anim.DiceAnimator` is a Pygame frontend, imported
-only if explicitly requested. Its existing `run_animation(...)` interface
-remains available. Pygame is not imported by `diceroll` or `diceroll_api`.
-
-## API migration (v2)
-
-- `dicerollAPI` remains available; `DiceAPI` is the preferred class name.
-- Invalid expressions now **raise** `DiceNotationError` instead of printing an
-  error and returning `None` from `dicerollAPI.roll_dice`.
-- `get_roll_sum` returns the full result, **including numeric modifiers**.
-- `roll_saving_throw` treats `success_threshold` as the threshold to compare.
-- `save_rolls=True` records in memory; writing is always **explicit**.
-- `roll_dice` additionally includes `components` and `modifier` keys;
-  existing `dice_notation`, `roll_result`, and `roll_details` remain.
-- No GUI or backend is imported by core modules.
-- Application-specific combat/loot/quest mechanics are intentionally **not**
-  part of the library.
+No automatic files are generated. Stored dice colours remain associated
+with their individual faces after JSON round-trips.
 
 ## Tests
 
-```sh
+Run the suite locally with no third-party test runner:
+
+```bash
 python -m unittest discover -s tests -v
 ```
 
-## Licence
+GitHub Actions validates Python **3.10, 3.12 and 3.14**, wheel building,
+wheel installation outside the checkout, all standard dice artwork, mixed
+expressions, deterministic random colours, exact probabilities, history,
+error handling and dependency-free SVG rendering.
 
-MIT. Originally designed for the [Adventure!](https://github.com/ViciousSquid/Adventure)
-interactive story engine; the standalone library can be used by any project.
+## Version 3 API
+
+This is a deliberate **breaking, clean API release**. The former top-level
+`diceroll.py`, `diceroll_api.py`, `diceroll_anim.py`, `DiceAPI`,
+`dicerollAPI`, `DiceType`, animation aliases and old duplicate roll
+methods are removed. Code should use `from diceroll import DiceRoller`,
+`roller.roll(...)` and `render_svg(result)`. Results are typed objects
+rather than loosely structured dictionaries; `to_dict()` exists for
+serialisation.
+
+No MiniWind or Fio game logic is packaged. MIT licensed.
