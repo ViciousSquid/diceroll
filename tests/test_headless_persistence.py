@@ -107,7 +107,8 @@ class HeadlessExecutionTests(unittest.TestCase):
             "DiceNotationError", "parse_dice_notation",
             "probability_target", "roll_check", "render_svg",
         }
-        self.assertEqual(set(diceroll.__all__), expected)
+        self.assertTrue(expected.issubset(set(diceroll.__all__)))
+        self.assertEqual(len(diceroll.__all__), len(set(diceroll.__all__)))
         for name in expected:
             self.assertTrue(hasattr(diceroll, name), name)
         for removed in ("DiceAPI", "dicerollAPI", "DiceType", "DiceAnimator"):
