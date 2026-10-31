@@ -1,5 +1,7 @@
 # diceroll
 
+**[Full API reference](docs/API.md)** — public signatures, result types, parameters, errors, integration patterns, and SVG rendering.
+
 A **dependency-free, installable Python dice module**, extracted from the
 reusable parts of MiniWind's dice engine. No Pygame, Qt, game engine or graphical
 library is installed or imported. Dice values, colours and exact probability
